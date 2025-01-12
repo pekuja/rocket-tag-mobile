@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://d0oq563agkkkg"]
+[gd_scene load_steps=11 format=3 uid="uid://d0oq563agkkkg"]
 
 [ext_resource type="Texture2D" uid="uid://b0yjn71jg0c0f" path="res://assets/spritesheet_complete.png" id="1_btx7r"]
 [ext_resource type="Texture2D" uid="uid://heyqi27rbw4l" path="res://assets/playerShip1_blue.png" id="3_8um3b"]
@@ -12,13 +12,17 @@ region = Rect2(0, 517, 128, 256)
 atlas = ExtResource("1_btx7r")
 region = Rect2(0, 775, 128, 256)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_g4xpy"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_jtcry"]
 atlas = ExtResource("1_btx7r")
-region = Rect2(0, 1, 128, 256)
+region = Rect2(0, 1032, 128, 256)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_c1q86"]
 atlas = ExtResource("1_btx7r")
 region = Rect2(0, 259, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4xpy"]
+atlas = ExtResource("1_btx7r")
+region = Rect2(0, 1, 128, 256)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_ysoh2"]
 animations = [{
@@ -35,10 +39,18 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_g4xpy")
+"texture": SubResource("AtlasTexture_jtcry")
+}],
+"loop": true,
+"name": &"stand",
+"speed": 5.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_c1q86")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4xpy")
 }],
 "loop": true,
 "name": &"walk",
@@ -46,8 +58,8 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_apsu0"]
-radius = 52.0
-height = 140.0
+radius = 53.0
+height = 144.0
 
 [node name="Player Character" type="CharacterBody2D"]
 
@@ -59,7 +71,7 @@ disabled = true
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(-2, -61)
 sprite_frames = SubResource("SpriteFrames_ysoh2")
-animation = &"jump"
+animation = &"stand"
 
 [node name="ShipSprite" type="Sprite2D" parent="."]
 visible = false
@@ -72,4 +84,6 @@ texture = ExtResource("4_k62k7")
 position = Vector2(0, -20)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2(0, -4)
 shape = SubResource("CapsuleShape2D_apsu0")

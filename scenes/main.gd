@@ -7,6 +7,8 @@ extends Node
 @onready var _peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 # @onready var _peer : WebSocketMultiplayerPeer = WebSocketMultiplayerPeer.new()
 
+@onready var camera = $Camera2D
+
 const SERVER_IP_ADDRESS = "192.168.0.139"
 const PORT = 28132
 const MAX_CONNECTIONS = 32
@@ -49,6 +51,8 @@ func _ready() -> void:
 		add_child(_client_scene)
 		
 		_client_scene.local_player.projectile_shot.connect(_on_projectile_shot)
+		
+		camera.local_player = _client_scene.local_player
 		
 		_peer.create_client(SERVER_IP_ADDRESS, PORT)
 		#_peer.create_client("wss://" + SERVER_IP_ADDRESS + ":" + str(PORT), TLSOptions.client(cert))

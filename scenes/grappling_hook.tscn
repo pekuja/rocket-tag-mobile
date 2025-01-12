@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxm1sx5j25goh"]
+
+[ext_resource type="Script" path="res://scenes/grappling_hook.gd" id="1_ec65q"]
+[ext_resource type="Texture2D" uid="uid://sr6lntvt2jd1" path="res://assets/wireHook.png" id="1_uwkml"]
+
+[node name="Grappling Hook" type="Node2D"]
+script = ExtResource("1_ec65q")
+
+[node name="HookSprite" type="Sprite2D" parent="."]
+z_index = -2
+position = Vector2(0, 4)
+texture = ExtResource("1_uwkml")
+centered = false
+offset = Vector2(-35, -4)
+flip_v = true
+
+[node name="Rope" type="Line2D" parent="."]
+z_index = -1
+points = PackedVector2Array(0, 7, 0, 100)
+width = 8.0
+default_color = Color(0.33, 0.2365, 0, 1)
+begin_cap_mode = 2
