@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://bv3i730ruyfy7"]
+
+[ext_resource type="Script" path="res://scenes/projectile.gd" id="1_ogaia"]
+[ext_resource type="Texture2D" uid="uid://qpo4wynw2vnc" path="res://assets/laserRed05.png" id="2_0adfc"]
+
+[node name="Projectile" type="Node2D"]
+script = ExtResource("1_ogaia")
+velocity = Vector2(0, 400)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_0adfc")

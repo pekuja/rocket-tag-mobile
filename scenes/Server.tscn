@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://qmofemihhiaa"]
+
+[ext_resource type="Script" path="res://scenes/server.gd" id="1_y1545"]
+[ext_resource type="Script" path="res://scenes/set_camera_zoom.gd" id="4_k4vmo"]
+
+[node name="Server" type="Node"]
+script = ExtResource("1_y1545")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(960, 540)
+script = ExtResource("4_k4vmo")

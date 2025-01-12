@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://ll1qk50qo6k7"]
+
+[ext_resource type="Script" path="res://scenes/local_player.gd" id="1_wco7s"]
+[ext_resource type="PackedScene" uid="uid://d0oq563agkkkg" path="res://scenes/player_character.tscn" id="2_k73e6"]
+
+[node name="LocalPlayer" type="Node2D"]
+script = ExtResource("1_wco7s")
+
+[node name="Character" parent="." instance=ExtResource("2_k73e6")]
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(-8, -66, 0, -74, 8, -66)
+width = 2.0

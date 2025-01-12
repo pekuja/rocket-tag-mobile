@@ -1,0 +1,77 @@
+[gd_scene load_steps=10 format=3 uid="uid://d0oq563agkkkg"]
+
+[ext_resource type="Texture2D" uid="uid://b0yjn71jg0c0f" path="res://assets/spritesheet_complete.png" id="1_btx7r"]
+[ext_resource type="Texture2D" uid="uid://heyqi27rbw4l" path="res://assets/playerShip1_blue.png" id="3_8um3b"]
+[ext_resource type="Texture2D" uid="uid://b1vya7ds3rghn" path="res://assets/gun07.png" id="4_k62k7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l0gkv"]
+atlas = ExtResource("1_btx7r")
+region = Rect2(0, 517, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4fqxq"]
+atlas = ExtResource("1_btx7r")
+region = Rect2(0, 775, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4xpy"]
+atlas = ExtResource("1_btx7r")
+region = Rect2(0, 1, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c1q86"]
+atlas = ExtResource("1_btx7r")
+region = Rect2(0, 259, 128, 256)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ysoh2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l0gkv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4fqxq")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4xpy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c1q86")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_apsu0"]
+radius = 52.0
+height = 140.0
+
+[node name="Player Character" type="CharacterBody2D"]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+visible = false
+polygon = PackedVector2Array(8, -37, 47, 20, 13, 28, -13, 28, -47, 20, -8, -37)
+disabled = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(-2, -61)
+sprite_frames = SubResource("SpriteFrames_ysoh2")
+animation = &"walk"
+frame = 1
+frame_progress = 0.249999
+
+[node name="ShipSprite" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("3_8um3b")
+
+[node name="GunSprite" type="Sprite2D" parent="."]
+texture = ExtResource("4_k62k7")
+
+[node name="ProjectileSpawnPoint" type="Node2D" parent="GunSprite"]
+position = Vector2(0, -20)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_apsu0")

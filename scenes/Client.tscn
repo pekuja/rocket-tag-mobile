@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3 uid="uid://b2ljetvkaygbm"]
+
+[ext_resource type="Script" path="res://scenes/client.gd" id="1_4mwrn"]
+[ext_resource type="PackedScene" uid="uid://bv3i730ruyfy7" path="res://scenes/projectile.tscn" id="3_4ggkj"]
+[ext_resource type="PackedScene" uid="uid://ll1qk50qo6k7" path="res://scenes/local_player.tscn" id="4_gjcdf"]
+[ext_resource type="Script" path="res://scenes/set_camera_zoom.gd" id="4_k4dci"]
+[ext_resource type="PackedScene" uid="uid://dbdtq8xotn1fj" path="res://scenes/touch_joystick_ui.tscn" id="5_uduoh"]
+
+[node name="Client" type="Node"]
+script = ExtResource("1_4mwrn")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(960, 540)
+script = ExtResource("4_k4dci")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Touch Joystick (Movement)" parent="CanvasLayer" instance=ExtResource("5_uduoh")]
+modulate = Color(0, 1, 0.65, 0.501961)
+offset_left = 312.0
+offset_top = -309.0
+offset_right = 312.0
+offset_bottom = -309.0
+inputMap_left = &"Move_Left"
+inputMap_right = &"Move_Right"
+inputMap_up = &"Move_Up"
+inputMap_down = &"Move_Down"
+inputMap_activate = &"Move_Activate"
+
+[node name="Touch Joystick (Shooting)" parent="CanvasLayer" instance=ExtResource("5_uduoh")]
+modulate = Color(1, 0, 0.0166664, 0.501961)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -362.0
+offset_top = -317.0
+offset_right = -362.0
+offset_bottom = -317.0
+grow_horizontal = 0
+inputMap_left = &"Shoot_Left"
+inputMap_right = &"Shoot_Right"
+inputMap_up = &"Shoot_Up"
+inputMap_down = &"Shoot_Down"
+inputMap_activate = &"Shoot_Activate"
+
+[node name="LocalPlayer" parent="." node_paths=PackedStringArray("moveInput", "shootInput") instance=ExtResource("4_gjcdf")]
+position = Vector2(966, 465)
+moveInput = NodePath("../CanvasLayer/Touch Joystick (Movement)")
+shootInput = NodePath("../CanvasLayer/Touch Joystick (Shooting)")
+projectileNode = ExtResource("3_4ggkj")
