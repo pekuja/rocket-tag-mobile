@@ -2,6 +2,7 @@ extends Node
 
 @export var remote_player_scene : PackedScene
 @export var projectile_scene: PackedScene
+@export var grapplinghook_scene : PackedScene
 # @export var cert : X509Certificate
 
 @onready var _peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
@@ -15,7 +16,8 @@ const MAX_CONNECTIONS = 32
 
 var _client_scene : ClientNode
 
-var _players = {}
+var players = {}
+var hooks = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -51,6 +53,8 @@ func _ready() -> void:
 		add_child(_client_scene)
 		
 		_client_scene.local_player.projectile_shot.connect(_on_projectile_shot)
+		_client_scene.local_player.grapplinghook_shot.connect(_on_grapplinghook_shot)
+		_client_scene.local_player.grapplinghook_detach.connect(_on_grapplinghook_detach)
 		
 		camera.local_player = _client_scene.local_player
 		
@@ -78,37 +82,71 @@ func _on_player_connected(id):
 	add_child(instance)
 	
 	print("Creating remote player instance for id ", id)
-	_players[id] = instance
+	players[id] = instance
 	
 func _on_player_disconnected(id):
 	print("Player ", id, " disconnected")
 	
-	remove_child(_players[id])
-	_players[id] = null
+	remove_child(players[id])
+	players.erase(id)
+	
+func is_multiplayer():
+	return _peer.get_connection_status() == ENetMultiplayerPeer.CONNECTION_CONNECTED
 
 func _process(_delta):
 	if OS.has_feature("server"):
 		return
 	
-	sync_player_position.rpc(_client_scene.local_player.character.global_position, _client_scene.local_player.character.rotation)
+	if is_multiplayer():
+		sync_player_position.rpc(_client_scene.local_player.character.global_position, _client_scene.local_player.character.rotation)
 
-func _on_projectile_shot(position, direction):
-	sync_projectile_shot.rpc(position, direction)
+func _on_projectile_shot(position, direction, speed):
+	if is_multiplayer():
+		sync_projectile_shot.rpc(position, direction, speed)
+
+func _on_grapplinghook_shot(position, direction, speed):
+	if is_multiplayer():
+		sync_grapplinghook_shot.rpc(position, direction, speed)
+	
+func _on_grapplinghook_detach():
+	if is_multiplayer():
+		sync_grapplinghook_detach.rpc()
 
 @rpc("any_peer")
-func sync_projectile_shot(position, direction):
-		direction = direction.normalized()
-		var projectile = projectile_scene.instantiate()
-		
-		const projectileSpeed = 400.0
-		
-		projectile.velocity = direction * projectileSpeed
-		projectile.lifetime = 1.0
-		
-		add_child(projectile)
-		
-		projectile.global_position = position
-		
+func sync_projectile_shot(position, direction, speed):
+	direction = direction.normalized()
+	var projectile = projectile_scene.instantiate()
+	
+	projectile.global_position = position
+	projectile.velocity = direction * speed
+	projectile.lifetime = 1.0
+	
+	add_child(projectile)	
+
+@rpc("any_peer")
+func sync_grapplinghook_shot(position, direction, speed):
+	direction = direction.normalized()
+	var hook = grapplinghook_scene.instantiate()
+	
+	hook.global_position = position	
+	hook.velocity = direction * speed
+	var id = multiplayer.get_remote_sender_id()
+	hook.player = players[id]
+	
+	add_child(hook)
+	
+	if hooks.has(id):
+		hooks[id].queue_free()
+	
+	hooks[id] = hook
+
+@rpc("any_peer")
+func sync_grapplinghook_detach():
+	var id = multiplayer.get_remote_sender_id()
+	
+	if hooks.has(id):
+		hooks[id].queue_free()
+		hooks.erase(id)
 
 @rpc("any_peer")
 func sync_player_position(position, rotation):
@@ -116,6 +154,6 @@ func sync_player_position(position, rotation):
 	var id = multiplayer.get_remote_sender_id()
 	#print("syncing position for player ", id)
 	
-	if _players.has(id):
-		_players[id].global_position = position
-		_players[id].rotation = rotation
+	if players.has(id):
+		players[id].global_position = position
+		players[id].rotation = rotation
