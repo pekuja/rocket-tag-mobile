@@ -1,8 +1,10 @@
 extends Camera2D
 
 @export var local_player : LocalPlayer
+@export var tileMap : TileMapLayer
 
 var _scale = 1.0
+var _mapBounds : Rect2i
 
 const BASE_WIDTH = 3840.0
 const BASE_HEIGHT = 2160.0
@@ -13,6 +15,12 @@ const BORDER_SIZE = Vector2(216.0, 216.0)
 func _ready() -> void:
 	get_viewport().connect("size_changed", _on_viewport_resize)
 	_on_viewport_resize()
+	
+	_mapBounds = tileMap.get_used_rect()
+	var pos : Vector2i = tileMap.map_to_local(_mapBounds.position) - tileMap.tile_set.tile_size * 0.5
+	var end : Vector2i = tileMap.map_to_local(_mapBounds.end) - tileMap.tile_set.tile_size * 0.5
+	_mapBounds.position = pos 
+	_mapBounds.end = end
 
 func _on_viewport_resize():
 	var h_scale = get_viewport().size.x / BASE_WIDTH
@@ -20,7 +28,7 @@ func _on_viewport_resize():
 	_scale = min(h_scale, v_scale)
 	self.zoom = _scale * Vector2(1.0, 1.0)
 
-func _process(_delta):
+func _process(_delta):	
 	if OS.has_feature("server"):
 		var average_pos = Vector2(0,0)
 		var min_pos = Vector2(INF, INF)
@@ -52,4 +60,9 @@ func _process(_delta):
 		else:
 			print("no players :(")
 	elif local_player:
-		self.position = local_player.character.global_position
+		self.global_position = local_player.character.global_position
+	
+	self.global_position = \
+		self.global_position.clamp(
+			_mapBounds.position + Vector2i(self.zoom * Vector2(BASE_WIDTH, BASE_HEIGHT)),
+			_mapBounds.end - Vector2i(self.zoom * Vector2(BASE_WIDTH, BASE_HEIGHT)))
