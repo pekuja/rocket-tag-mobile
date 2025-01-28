@@ -1,5 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://d0oq563agkkkg"]
+[gd_scene load_steps=12 format=3 uid="uid://d0oq563agkkkg"]
 
+[ext_resource type="Script" path="res://scenes/player_character.gd" id="1_4l8mv"]
 [ext_resource type="Texture2D" uid="uid://b0yjn71jg0c0f" path="res://assets/spritesheet_complete.png" id="1_btx7r"]
 [ext_resource type="Texture2D" uid="uid://heyqi27rbw4l" path="res://assets/playerShip1_blue.png" id="3_8um3b"]
 [ext_resource type="Texture2D" uid="uid://b1vya7ds3rghn" path="res://assets/gun07.png" id="4_k62k7"]
@@ -62,6 +63,7 @@ radius = 53.0
 height = 144.0
 
 [node name="Player Character" type="CharacterBody2D"]
+script = ExtResource("1_4l8mv")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 visible = false

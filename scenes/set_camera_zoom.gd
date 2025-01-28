@@ -48,7 +48,7 @@ func _process(_delta):
 			min_pos -= BORDER_SIZE
 			max_pos += BORDER_SIZE
 			
-			print("average pos: ", average_pos)
+			#print("average pos: ", average_pos)
 			self.global_position = average_pos
 			var new_zoom = 1.0
 			if max_pos.x > min_pos.x:
@@ -57,8 +57,8 @@ func _process(_delta):
 				new_zoom = minf(new_zoom, BASE_WIDTH / (max_pos.y - min_pos.y))
 				
 			self.zoom = new_zoom * _scale * Vector2(1.0, 1.0)
-		else:
-			print("no players :(")
+		#else:
+			#print("no players :(")
 	elif local_player:
 		self.global_position = local_player.character.global_position
 	

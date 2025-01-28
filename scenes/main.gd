@@ -9,8 +9,9 @@ extends Node
 # @onready var _peer : WebSocketMultiplayerPeer = WebSocketMultiplayerPeer.new()
 
 @onready var camera = $Camera2D
+@onready var spawnPoint = $SpawnPoint
 
-const SERVER_IP_ADDRESS = "192.168.0.139"
+const SERVER_IP_ADDRESS = "192.168.0.140"
 const PORT = 28132
 const MAX_CONNECTIONS = 32
 
@@ -84,21 +85,28 @@ func _on_player_connected(id):
 	print("Creating remote player instance for id ", id)
 	players[id] = instance
 	
+	instance.global_position = spawnPoint.global_position
+	
 func _on_player_disconnected(id):
 	print("Player ", id, " disconnected")
 	
 	remove_child(players[id])
 	players.erase(id)
 	
+	if hooks.has(id):
+		remove_child(hooks[id])
+		hooks.erase(id)
+	
 func is_multiplayer():
 	return _peer.get_connection_status() == ENetMultiplayerPeer.CONNECTION_CONNECTED
 
 func _process(_delta):
-	if OS.has_feature("server"):
+	if not (OS.has_feature("server") and is_multiplayer()):
 		return
 	
-	if is_multiplayer():
-		sync_player_position.rpc(_client_scene.local_player.character.global_position, _client_scene.local_player.character.rotation)
+	for playerId in players:
+		var playerCharacter = players[playerId]
+		sync_player_position.rpc(playerId, playerCharacter.global_position, playerCharacter.velocity)
 
 func _on_projectile_shot(position, direction, speed):
 	if is_multiplayer():
@@ -112,7 +120,7 @@ func _on_grapplinghook_detach():
 	if is_multiplayer():
 		sync_grapplinghook_detach.rpc()
 
-@rpc("any_peer")
+@rpc("any_peer", "call_remote")
 func sync_projectile_shot(position, direction, speed):
 	direction = direction.normalized()
 	var projectile = projectile_scene.instantiate()
@@ -123,7 +131,7 @@ func sync_projectile_shot(position, direction, speed):
 	
 	add_child(projectile)	
 
-@rpc("any_peer")
+@rpc("any_peer", "call_remote")
 func sync_grapplinghook_shot(position, direction, speed):
 	direction = direction.normalized()
 	var hook = grapplinghook_scene.instantiate()
@@ -132,6 +140,7 @@ func sync_grapplinghook_shot(position, direction, speed):
 	hook.velocity = direction * speed
 	var id = multiplayer.get_remote_sender_id()
 	hook.player = players[id]
+	players[id].hook = hook
 	
 	add_child(hook)
 	
@@ -140,20 +149,20 @@ func sync_grapplinghook_shot(position, direction, speed):
 	
 	hooks[id] = hook
 
-@rpc("any_peer")
+@rpc("any_peer", "call_remote")
 func sync_grapplinghook_detach():
 	var id = multiplayer.get_remote_sender_id()
 	
 	if hooks.has(id):
+		players[id].hook = null
 		hooks[id].queue_free()
 		hooks.erase(id)
 
-@rpc("any_peer")
-func sync_player_position(position, rotation):
-	
-	var id = multiplayer.get_remote_sender_id()
-	#print("syncing position for player ", id)
-	
+@rpc("authority", "call_remote")
+func sync_player_position(id, position, velocity):
 	if players.has(id):
 		players[id].global_position = position
-		players[id].rotation = rotation
+		players[id].velocity = velocity
+	elif id == multiplayer.get_unique_id():
+		_client_scene.local_player.character.global_position = position
+		_client_scene.local_player.character.velocity = velocity
