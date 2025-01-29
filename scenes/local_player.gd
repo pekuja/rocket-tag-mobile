@@ -35,45 +35,17 @@ func _process(_delta: float) -> void:
 		var direction = shootInput.joystick_position
 		if direction.length() > SHOOT_THRESHOLD:
 			direction = direction.normalized()
-			var projectile = projectileScene.instantiate()
+			projectile_shot.emit(_projectile_spawn_point.global_position, direction, projectileSpeed)
 			
-			projectile.velocity = direction * projectileSpeed
-			projectile.lifetime = 4.0
-			
-			get_parent().add_child(projectile)
-			
-			projectile.global_position = _projectile_spawn_point.global_position
-			
-			projectile_shot.emit(projectile.global_position, direction, projectileSpeed)
-			
-	if moveInput.is_just_released:
-		on_hook_detached()
-		
+	if moveInput.is_just_released:		
 		var direction = moveInput.joystick_position
 		if direction.length() > HOOK_THRESHOLD:
-			direction = direction.normalized()
-			var grapplingHook = grapplingHookScene.instantiate()
-			
-			grapplingHook.player = character
-			grapplingHook.velocity = direction * grapplingHookSpeed# + character.velocity
-			
-			get_parent().add_child(grapplingHook)
-			
-			grapplingHook.global_position = character.global_position
-			
-			character.hook = grapplingHook
-			character.hook.hook_detached.connect(on_hook_detached)
-			
-			grapplinghook_shot.emit(character.hook.global_position, direction, grapplingHookSpeed)
+			grapplinghook_shot.emit(character.global_position, direction, grapplingHookSpeed)
+		else:
+			grapplinghook_detach.emit()
 	
 	if moveInput.is_pressed:
 		var target_rotation = Vector2(0, -1).angle_to(moveInput.joystick_position)
 		_arrow.rotation = target_rotation
 	if shootInput.is_pressed and shootInput.joystick_position.length() > SHOOT_THRESHOLD:
 		_sprite_gun.global_rotation = Vector2(0, -1).angle_to(shootInput.joystick_position)
-
-func on_hook_detached():
-	if character.hook:
-		character.hook.queue_free()
-		grapplinghook_detach.emit()
-		character.hook = null

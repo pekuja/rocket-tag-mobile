@@ -27,25 +27,8 @@ func _ready() -> void:
 		scene = ResourceLoader.load("res://scenes/Server.tscn")
 		add_child(scene.instantiate())
 		
-		# const KEY_FILE = "rocket.key"
-		# const CERT_FILE = "rocket.crt"
-		
-		#var key : CryptoKey
-		#
-		#if not FileAccess.file_exists(KEY_FILE):
-			#print("Generating crypto key in ", KEY_FILE, " and cert in ", CERT_FILE)
-			#var crypto = Crypto.new()
-			#key = crypto.generate_rsa(4096)
-			#cert = crypto.generate_self_signed_certificate(key, "CN=pekuja.com,O=Pekka Kujansuu,C=FI")
-			#key.save(KEY_FILE)
-			#cert.save(CERT_FILE)
-		#else:
-			#key = CryptoKey.new()
-			#key.load(KEY_FILE)
-		
 		_peer.create_server(PORT, MAX_CONNECTIONS)
 		
-		#_peer.create_server(PORT, "*", TLSOptions.server(key, cert))
 		multiplayer.multiplayer_peer = _peer
 	else:
 		scene = ResourceLoader.load("res://scenes/Client.tscn")
@@ -60,7 +43,6 @@ func _ready() -> void:
 		camera.local_player = _client_scene.local_player
 		
 		_peer.create_client(SERVER_IP_ADDRESS, PORT)
-		#_peer.create_client("wss://" + SERVER_IP_ADDRESS + ":" + str(PORT), TLSOptions.client(cert))
 		multiplayer.multiplayer_peer = _peer
 		
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -106,7 +88,16 @@ func _process(_delta):
 	
 	for playerId in players:
 		var playerCharacter = players[playerId]
-		sync_player_position.rpc(playerId, playerCharacter.global_position, playerCharacter.velocity)
+		var hookState : GrapplingHook.State = GrapplingHook.State.Inactive
+		var hookPosition = Vector2(0,0)
+		var hookVelocity = Vector2(0,0)
+		if playerCharacter.hook:
+			hookState = playerCharacter.hook.state
+			hookPosition = playerCharacter.hook.position
+			hookVelocity = playerCharacter.hook.velocity
+		sync_player_state.rpc(
+			playerId, playerCharacter.global_position, playerCharacter.velocity,
+			hookState, hookPosition, hookVelocity)
 
 func _on_projectile_shot(position, direction, speed):
 	if is_multiplayer():
@@ -130,39 +121,68 @@ func sync_projectile_shot(position, direction, speed):
 	projectile.lifetime = 1.0
 	
 	add_child(projectile)	
+	
+func get_player_character(id):
+	if id == multiplayer.get_unique_id():
+		return _client_scene.local_player.character
+	else:
+		return players[id]
 
-@rpc("any_peer", "call_remote")
-func sync_grapplinghook_shot(position, direction, speed):
-	direction = direction.normalized()
+func create_hook(id):
+	if hooks.has(id):
+		return hooks[id]
+		
+	var player = get_player_character(id)
 	var hook = grapplinghook_scene.instantiate()
 	
-	hook.global_position = position	
-	hook.velocity = direction * speed
-	var id = multiplayer.get_remote_sender_id()
-	hook.player = players[id]
-	players[id].hook = hook
+	hook.player = player
+	player.hook = hook
 	
 	add_child(hook)
 	
+	hooks[id] = hook
+	
+	return hook
+	
+func detach_hook(id):
+	if id == multiplayer.get_unique_id():
+		_client_scene.local_player.character.hook = null
+	elif players.has(id):
+		players[id].hook = null
+		
 	if hooks.has(id):
 		hooks[id].queue_free()
+		hooks.erase(id)
+
+@rpc("any_peer", "call_remote")
+func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):
+	direction = direction.normalized()
+	var id = multiplayer.get_remote_sender_id()
+	var hook = create_hook(id)
 	
-	hooks[id] = hook
+	hook.state = GrapplingHook.State.Flying
+	
+	hook.global_position = position	
+	hook.velocity = direction * speed
 
 @rpc("any_peer", "call_remote")
 func sync_grapplinghook_detach():
 	var id = multiplayer.get_remote_sender_id()
-	
-	if hooks.has(id):
-		players[id].hook = null
-		hooks[id].queue_free()
-		hooks.erase(id)
+	detach_hook(id)
 
 @rpc("authority", "call_remote")
-func sync_player_position(id, position, velocity):
-	if players.has(id):
-		players[id].global_position = position
-		players[id].velocity = velocity
-	elif id == multiplayer.get_unique_id():
-		_client_scene.local_player.character.global_position = position
-		_client_scene.local_player.character.velocity = velocity
+func sync_player_state(id, position : Vector2i, velocity : Vector2,
+		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
+	var player = get_player_character(id)
+	
+	if player:
+		player.global_position = position
+		player.velocity = velocity
+		
+	if hookState == GrapplingHook.State.Inactive:
+		detach_hook(id)
+	else:
+		var hook = create_hook(id)
+		hook.global_position = hookPosition
+		hook.velocity = hookVelocity
+		hook.state = hookState

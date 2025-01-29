@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+class_name PlayerCharacter
+
 @onready var _animation_player = $AnimatedSprite2D
 
 var hook : Node2D
@@ -27,7 +29,7 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		velocity.x = move_toward(velocity.x, 0, DECELERATE * delta)
 
-	if hook and hook.is_hooked:
+	if hook and hook.state == GrapplingHook.State.Hooked:
 		#hacky magnitude
 		var direction = (hook.global_position - global_position).normalized()
 		var magnitude = minf((hook.global_position - global_position).length() * 5, 5000)
@@ -37,7 +39,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if abs(velocity.x) > 0 and is_on_floor():
 		_animation_player.play("walk")
 	elif not is_on_floor():
