@@ -113,15 +113,26 @@ func _on_grapplinghook_detach():
 
 @rpc("any_peer", "call_remote")
 func sync_projectile_shot(position, direction, speed):
+	var id = multiplayer.get_remote_sender_id()
 	direction = direction.normalized()
-	var projectile = projectile_scene.instantiate()
+	var projectile : Projectile = projectile_scene.instantiate()
 	
+	projectile.player = players[id]
 	projectile.global_position = position
 	projectile.velocity = direction * speed
 	projectile.lifetime = 1.0
 	
-	add_child(projectile)	
+	projectile.projectile_impact.connect(_on_projectile_impact)
+	projectile.projectile_expired.connect(_on_projectile_expired)
 	
+	add_child(projectile)
+
+func _on_projectile_impact(position):
+	pass
+	
+func _on_projectile_expired():
+	pass
+
 func get_player_character(id):
 	if id == multiplayer.get_unique_id():
 		return _client_scene.local_player.character
@@ -162,7 +173,7 @@ func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : f
 	
 	hook.state = GrapplingHook.State.Flying
 	
-	hook.global_position = position	
+	hook.global_position = position
 	hook.velocity = direction * speed
 
 @rpc("any_peer", "call_remote")

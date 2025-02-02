@@ -5,10 +5,8 @@ class_name LocalPlayer
 @export var moveInput : TouchJoystick
 @export var shootInput : TouchJoystick
 
-@export var projectileScene : PackedScene
 @export var projectileSpeed = 400.0
 
-@export var grapplingHookScene : PackedScene
 @export var grapplingHookSpeed = 400.0
 
 @onready var character = $Character
