@@ -64,5 +64,5 @@ func _process(_delta):
 	
 	self.global_position = \
 		self.global_position.clamp(
-			_mapBounds.position + Vector2i(self.zoom * Vector2(BASE_WIDTH, BASE_HEIGHT)),
-			_mapBounds.end - Vector2i(self.zoom * Vector2(BASE_WIDTH, BASE_HEIGHT)))
+			_mapBounds.position + Vector2i(0.5 * Vector2(BASE_WIDTH, BASE_HEIGHT)),
+			_mapBounds.end - Vector2i(0.5 * Vector2(BASE_WIDTH, BASE_HEIGHT)))
