@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=4 uid="uid://cqvfl2xj5v8dq"]
+[gd_scene load_steps=10 format=4 uid="uid://cqvfl2xj5v8dq"]
 
 [ext_resource type="Script" path="res://scenes/main.gd" id="1_3whee"]
 [ext_resource type="PackedScene" uid="uid://d0oq563agkkkg" path="res://scenes/player_character.tscn" id="1_d7jjr"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bxm1sx5j25goh" path="res://scenes/grappling_hook.tscn" id="4_pupse"]
 [ext_resource type="Script" path="res://scenes/set_camera_zoom.gd" id="4_vtgos"]
 [ext_resource type="Texture2D" uid="uid://b0yjn71jg0c0f" path="res://assets/spritesheet_complete.png" id="5_4cdry"]
+[ext_resource type="PackedScene" uid="uid://b60abx4wrm4jm" path="res://scenes/explosion.tscn" id="5_8r8x7"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tl1x0"]
 texture = ExtResource("5_4cdry")
@@ -598,6 +599,7 @@ script = ExtResource("1_3whee")
 remote_player_scene = ExtResource("1_d7jjr")
 projectile_scene = ExtResource("3_n38mb")
 grapplinghook_scene = ExtResource("4_pupse")
+explosion_scene = ExtResource("5_8r8x7")
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("tileMap")]
 position = Vector2(960, 540)

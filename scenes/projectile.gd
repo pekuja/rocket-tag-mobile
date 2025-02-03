@@ -5,8 +5,8 @@ class_name Projectile
 @export var velocity = Vector2(0,1)
 @export var lifetime = 1.0
 
-signal projectile_impact(position)
-signal projectile_expired()
+signal projectile_impact(projectile)
+signal projectile_expired(projectile)
 
 var player : PlayerCharacter
 
@@ -17,6 +17,8 @@ func _ready() -> void:
 	_time_created = Time.get_ticks_msec()
 	
 	rotation = Vector2(0, -1).angle_to(velocity)
+	
+	print("Projectile created")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -29,10 +31,12 @@ func _physics_process(delta: float) -> void:
 	var result = space_state.intersect_ray(query)
 	
 	if result:
-		projectile_impact.emit(result.position)
+		projectile_impact.emit(self)
+		print("Projectile hit something")
 	
-	global_position += new_position
+	global_position = new_position
 	
 	if Time.get_ticks_msec() - _time_created > 1000 * lifetime:
 		self.queue_free()
-		projectile_expired.emit()
+		projectile_expired.emit(self)
+		print("Projectile expired")

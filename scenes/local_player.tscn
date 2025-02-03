@@ -1,15 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://ll1qk50qo6k7"]
+[gd_scene load_steps=3 format=3 uid="uid://ll1qk50qo6k7"]
 
 [ext_resource type="Script" path="res://scenes/local_player.gd" id="1_wco7s"]
-[ext_resource type="PackedScene" uid="uid://bxm1sx5j25goh" path="res://scenes/grappling_hook.tscn" id="2_0nn0a"]
 [ext_resource type="PackedScene" uid="uid://d0oq563agkkkg" path="res://scenes/player_character.tscn" id="2_k73e6"]
-[ext_resource type="PackedScene" uid="uid://bv3i730ruyfy7" path="res://scenes/projectile.tscn" id="2_ls3qc"]
 
 [node name="LocalPlayer" type="Node2D"]
 script = ExtResource("1_wco7s")
-projectileScene = ExtResource("2_ls3qc")
 projectileSpeed = 1600.0
-grapplingHookScene = ExtResource("2_0nn0a")
 grapplingHookSpeed = 1600.0
 
 [node name="Character" parent="." instance=ExtResource("2_k73e6")]

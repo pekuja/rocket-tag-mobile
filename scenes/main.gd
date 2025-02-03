@@ -3,10 +3,9 @@ extends Node
 @export var remote_player_scene : PackedScene
 @export var projectile_scene: PackedScene
 @export var grapplinghook_scene : PackedScene
-# @export var cert : X509Certificate
+@export var explosion_scene : PackedScene
 
 @onready var _peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-# @onready var _peer : WebSocketMultiplayerPeer = WebSocketMultiplayerPeer.new()
 
 @onready var camera = $Camera2D
 @onready var spawnPoint = $SpawnPoint
@@ -111,27 +110,39 @@ func _on_grapplinghook_detach():
 	if is_multiplayer():
 		sync_grapplinghook_detach.rpc()
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_local")
 func sync_projectile_shot(position, direction, speed):
 	var id = multiplayer.get_remote_sender_id()
 	direction = direction.normalized()
 	var projectile : Projectile = projectile_scene.instantiate()
 	
-	projectile.player = players[id]
+	projectile.player = get_player_character(id)
 	projectile.global_position = position
 	projectile.velocity = direction * speed
 	projectile.lifetime = 1.0
 	
-	projectile.projectile_impact.connect(_on_projectile_impact)
-	projectile.projectile_expired.connect(_on_projectile_expired)
+	if OS.has_feature("server"):
+		projectile.projectile_impact.connect(_on_projectile_impact)
+		projectile.projectile_expired.connect(_on_projectile_expired)
 	
 	add_child(projectile)
-
-func _on_projectile_impact(position):
-	pass
 	
-func _on_projectile_expired():
-	pass
+@rpc("authority", "call_local")
+func sync_create_explosion(position):
+	print("Create explosion")
+	var explosion = explosion_scene.instantiate()
+	explosion.global_position = position
+	
+	add_child(explosion)
+
+func _on_projectile_impact(projectile):
+	print("Projectile impact")
+	sync_create_explosion.rpc(projectile.global_position)
+	remove_child(projectile)
+	
+func _on_projectile_expired(projectile):
+	print("Projectile expired")
+	sync_create_explosion.rpc(projectile.global_position)
 
 func get_player_character(id):
 	if id == multiplayer.get_unique_id():
@@ -156,10 +167,8 @@ func create_hook(id):
 	return hook
 	
 func detach_hook(id):
-	if id == multiplayer.get_unique_id():
-		_client_scene.local_player.character.hook = null
-	elif players.has(id):
-		players[id].hook = null
+	var player = get_player_character(id)
+	player.hook = null
 		
 	if hooks.has(id):
 		hooks[id].queue_free()
