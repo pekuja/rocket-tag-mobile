@@ -3,11 +3,12 @@ extends Camera2D
 @export var local_player : LocalPlayer
 @export var tileMap : TileMapLayer
 
-var _scale = 1.0
-var _mapBounds : Rect2i
-
 const BASE_WIDTH = 3840.0
 const BASE_HEIGHT = 2160.0
+
+var _scale = 1.0
+var _mapBounds : Rect2i
+var _unzoomedViewportSize = Vector2i(BASE_WIDTH, BASE_HEIGHT)
 
 const BORDER_SIZE = Vector2(216.0, 216.0)
 
@@ -27,6 +28,11 @@ func _on_viewport_resize():
 	var v_scale = get_viewport().size.y / BASE_HEIGHT
 	_scale = min(h_scale, v_scale)
 	self.zoom = _scale * Vector2(1.0, 1.0)
+	
+	if h_scale < v_scale:
+		_unzoomedViewportSize = Vector2i(BASE_WIDTH, v_scale / h_scale * BASE_HEIGHT)
+	else:
+		_unzoomedViewportSize = Vector2i(BASE_WIDTH * h_scale / v_scale, BASE_HEIGHT)
 
 func _process(_delta):	
 	if OS.has_feature("server"):
@@ -62,7 +68,8 @@ func _process(_delta):
 	elif local_player:
 		self.global_position = local_player.character.global_position
 	
-	self.global_position = \
-		self.global_position.clamp(
-			_mapBounds.position + Vector2i(0.5 * Vector2(BASE_WIDTH, BASE_HEIGHT)),
-			_mapBounds.end - Vector2i(0.5 * Vector2(BASE_WIDTH, BASE_HEIGHT)))
+	var topLeft = _mapBounds.position + _unzoomedViewportSize / 2
+	var bottomRight = _mapBounds.end - _unzoomedViewportSize / 2
+	
+	global_position = global_position.clamp(topLeft, bottomRight)
+	
