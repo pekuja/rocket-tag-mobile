@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b60abx4wrm4jm"]
+[gd_scene load_steps=13 format=3 uid="uid://b60abx4wrm4jm"]
 
 [ext_resource type="Texture2D" uid="uid://h3mvsvv6ran1" path="res://assets/explosion/regularExplosion00.png" id="1_h1cmb"]
 [ext_resource type="Script" path="res://scenes/explosion.gd" id="1_rfvec"]
@@ -46,8 +46,19 @@ animations = [{
 "speed": 15.0
 }]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_m4cf7"]
+
 [node name="Explosion" type="Node2D"]
 script = ExtResource("1_rfvec")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(2.1875, 2.1875)
 sprite_frames = SubResource("SpriteFrames_lu2dp")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+scale = Vector2(21.08, 21.08)
+shape = SubResource("CircleShape2D_m4cf7")
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

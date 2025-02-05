@@ -46,3 +46,14 @@ func _process(_delta: float) -> void:
 		_animation_player.play("jump")
 	else:
 		_animation_player.play("stand")
+		
+func explosion_hit(pos : Vector2):
+	var diff = global_position - pos
+	
+	var force_magnitude = 100000.0 / diff.length()
+	var force_direction = diff.normalized()
+	
+	velocity += force_magnitude * force_direction
+	print("Applying force of magnitude ", force_magnitude)
+	
+	print("explosion hit")
