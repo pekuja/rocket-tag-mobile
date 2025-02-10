@@ -56,6 +56,7 @@ scale = Vector2(2.1875, 2.1875)
 sprite_frames = SubResource("SpriteFrames_lu2dp")
 
 [node name="Area2D" type="Area2D" parent="."]
+position = Vector2(1, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 scale = Vector2(21.08, 21.08)

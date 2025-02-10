@@ -89,3 +89,14 @@ position = Vector2(0, -20)
 visible = false
 position = Vector2(0, -4)
 shape = SubResource("CapsuleShape2D_apsu0")
+
+[node name="HealthBar Background" type="Line2D" parent="."]
+position = Vector2(-49.695, -82.91)
+points = PackedVector2Array(0, 0, 100, 0)
+default_color = Color(0, 0, 0, 1)
+
+[node name="HealthBar" type="Line2D" parent="."]
+position = Vector2(-49.695, -82.91)
+points = PackedVector2Array(0, 0, 100, 0)
+width = 8.0
+default_color = Color(0.0500001, 1, 0, 1)

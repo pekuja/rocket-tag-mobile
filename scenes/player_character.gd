@@ -3,8 +3,11 @@ extends CharacterBody2D
 class_name PlayerCharacter
 
 @onready var _animation_player = $AnimatedSprite2D
+@onready var _healthbar = $HealthBar
 
 var hook : Node2D
+
+var health = 100
 
 const SPEED = 300.0
 const ACCELERATE = 1200.0
@@ -54,6 +57,10 @@ func explosion_hit(pos : Vector2):
 	var force_direction = diff.normalized()
 	
 	velocity += force_magnitude * force_direction
-	print("Applying force of magnitude ", force_magnitude)
+		
+	var damage = round(5000 / diff.length())
+	health = clamp(health - damage, 0, 100)
 	
-	print("explosion hit")
+	_healthbar.points[1].x = health
+	
+	
