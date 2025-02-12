@@ -15,6 +15,7 @@ const PORT = 28132
 const MAX_CONNECTIONS = 32
 
 var _client_scene : ClientNode
+var _next_projectile_id = 0
 
 var players = {}
 var hooks = {}
@@ -64,6 +65,7 @@ func _on_player_connected(id):
 	add_child(instance)
 	
 	print("Creating remote player instance for id ", id)
+	instance.id = id
 	players[id] = instance
 	
 	instance.global_position = spawnPoint.global_position
@@ -100,7 +102,8 @@ func _process(_delta):
 
 func _on_projectile_shot(position, direction, speed):
 	if is_multiplayer():
-		sync_projectile_shot.rpc(position, direction, speed)
+		sync_projectile_shot.rpc(_next_projectile_id, position, direction, speed)
+		_next_projectile_id += 1
 
 func _on_grapplinghook_shot(position, direction, speed):
 	if is_multiplayer():
@@ -111,12 +114,13 @@ func _on_grapplinghook_detach():
 		sync_grapplinghook_detach.rpc()
 
 @rpc("any_peer", "call_local")
-func sync_projectile_shot(position, direction, speed):
+func sync_projectile_shot(projectile_id, position, direction, speed):
 	var id = multiplayer.get_remote_sender_id()
 	direction = direction.normalized()
 	var projectile : Projectile = projectile_scene.instantiate()
 	
 	projectile.player = get_player_character(id)
+	projectile.id = projectile_id
 	projectile.global_position = position
 	projectile.velocity = direction * speed
 	projectile.lifetime = 1.0
@@ -124,6 +128,8 @@ func sync_projectile_shot(position, direction, speed):
 	if OS.has_feature("server"):
 		projectile.projectile_impact.connect(_on_projectile_impact)
 		projectile.projectile_expired.connect(_on_projectile_expired)
+		
+	projectile.player.projectiles[projectile.id] = projectile
 	
 	add_child(projectile)
 	
@@ -135,10 +141,18 @@ func sync_create_explosion(position):
 	
 	add_child(explosion)
 
+@rpc("authority", "call_local")
+func sync_remove_projectile(player_id, projectile_id):
+	var player = get_player_character(player_id)
+	if player.projectiles.has(projectile_id):
+		var projectile = player.projectiles[projectile_id]
+		remove_child(projectile)
+		player.projectiles.erase(projectile_id)
+
 func _on_projectile_impact(projectile):
 	print("Projectile impact")
 	sync_create_explosion.rpc(projectile.global_position)
-	remove_child(projectile)
+	sync_remove_projectile.rpc(projectile.player.id, projectile.id)
 	
 func _on_projectile_expired(projectile):
 	print("Projectile expired")

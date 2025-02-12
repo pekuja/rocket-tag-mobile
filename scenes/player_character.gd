@@ -6,6 +6,8 @@ class_name PlayerCharacter
 @onready var _healthbar = $HealthBar
 
 var hook : Node2D
+var projectiles = {}
+var id = -1
 
 var health = 100
 

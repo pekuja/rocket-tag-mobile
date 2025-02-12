@@ -80,7 +80,9 @@ visible = false
 texture = ExtResource("3_8um3b")
 
 [node name="GunSprite" type="Sprite2D" parent="."]
+position = Vector2(0, 36)
 texture = ExtResource("4_k62k7")
+offset = Vector2(0, -16)
 
 [node name="ProjectileSpawnPoint" type="Node2D" parent="GunSprite"]
 position = Vector2(0, -20)
