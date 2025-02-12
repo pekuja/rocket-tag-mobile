@@ -8,8 +8,13 @@ script = ExtResource("1_wco7s")
 projectileSpeed = 1600.0
 grapplingHookSpeed = 1600.0
 
+[node name="AimGuide" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(0, 0, 229.055, 0)
+default_color = Color(1, 1, 1, 0.25098)
+
 [node name="Character" parent="." instance=ExtResource("2_k73e6")]
 
-[node name="Line2D" type="Line2D" parent="Character"]
+[node name="Arrow" type="Line2D" parent="Character"]
 points = PackedVector2Array(-8, -81, 0, -93, 8, -81)
 width = 2.0
