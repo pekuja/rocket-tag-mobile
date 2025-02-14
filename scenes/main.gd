@@ -21,6 +21,7 @@ var _next_projectile_id = 0
 var _ping_send_time = 0
 var _waiting_for_ping = false
 var _ping_results = []
+var _game_time_offsets = []
 
 var players = {}
 var hooks = {}
@@ -54,7 +55,21 @@ func _ready() -> void:
 	multiplayer.connection_failed.connect(_on_connection_failed)
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
+
+func get_average_game_time_offset():
+	if _game_time_offsets.is_empty():
+		return 0
+	var average_offset = 0
+	for offset in _game_time_offsets:
+		average_offset += offset
+	return average_offset / _game_time_offsets.size()
 	
+func get_game_time():
+	return Time.get_ticks_usec() + get_average_game_time_offset()
+
+func get_game_time_sec():
+	return get_game_time() / 1000000.0
+
 func _on_connected_to_server():
 	print("Connected to server")
 	
@@ -246,10 +261,10 @@ func send_ping_to_server():
 @rpc("any_peer", "call_remote")
 func ping():
 	var id = multiplayer.get_remote_sender_id()
-	pong.rpc_id(id)
+	pong.rpc_id(id, Time.get_ticks_usec())
 	
 @rpc("any_peer", "call_remote")
-func pong():
+func pong(game_time : int):
 	var current_time = Time.get_ticks_usec()
 	var elapsed_time = current_time - _ping_send_time
 	
@@ -262,5 +277,14 @@ func pong():
 	for latency in _ping_results:
 		average_latency += latency
 	average_latency /= _ping_results.size()
+	
+	var new_time = game_time + elapsed_time / 2
+	var new_offset = new_time - current_time
+	var old_average = get_average_game_time_offset()	
+	_game_time_offsets.append(new_offset)
+	if _game_time_offsets.size() > PING_RESULTS_TO_AVERAGE:
+		_game_time_offsets.pop_front()
+	var diff = get_average_game_time_offset() - old_average
+	print("Adjusted time offset by %s ms" % (diff / 1000.0))
 	
 	_client_scene.ping_label.text = "Ping: %s ms " % (average_latency / 1000.0)
