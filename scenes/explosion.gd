@@ -1,7 +1,6 @@
 extends Node2D
 
 @onready var _animatedSprite = $AnimatedSprite2D
-@onready var _area = $Area2D
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

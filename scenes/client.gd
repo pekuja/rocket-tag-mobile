@@ -3,6 +3,7 @@ extends Node
 class_name ClientNode
 
 @onready var local_player = $LocalPlayer
+@onready var ping_label = $CanvasLayer/Ping
 
 #@onready var _peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 #

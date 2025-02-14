@@ -13,9 +13,14 @@ extends Node
 const SERVER_IP_ADDRESS = "192.168.0.140"
 const PORT = 28132
 const MAX_CONNECTIONS = 32
+const PING_INTERVAL_US = 100000
+const PING_RESULTS_TO_AVERAGE = 10
 
 var _client_scene : ClientNode
 var _next_projectile_id = 0
+var _ping_send_time = 0
+var _waiting_for_ping = false
+var _ping_results = []
 
 var players = {}
 var hooks = {}
@@ -56,6 +61,10 @@ func _on_connected_to_server():
 func _on_connection_failed():
 	print("Failed to connect to server")
 	
+	_peer.create_server(PORT, MAX_CONNECTIONS)
+	
+	multiplayer.multiplayer_peer = _peer
+	
 func _on_player_connected(id):
 	print("Player ", id, " connected")
 	if id == 1: # no player character for server
@@ -84,9 +93,13 @@ func is_multiplayer():
 	return _peer.get_connection_status() == ENetMultiplayerPeer.CONNECTION_CONNECTED
 
 func _process(_delta):
-	if not (OS.has_feature("server") and is_multiplayer()):
-		return
+	if is_multiplayer():
+		if OS.has_feature("server"):
+			server_process()
+		else:
+			client_process()
 	
+func server_process():
 	for playerId in players:
 		var playerCharacter = players[playerId]
 		var hookState : GrapplingHook.State = GrapplingHook.State.Inactive
@@ -99,6 +112,10 @@ func _process(_delta):
 		sync_player_state.rpc(
 			playerId, playerCharacter.global_position, playerCharacter.velocity,
 			hookState, hookPosition, hookVelocity)
+			
+func client_process():
+	if not _waiting_for_ping and Time.get_ticks_usec() - _ping_send_time >= PING_INTERVAL_US:
+		send_ping_to_server()
 
 func _on_projectile_shot(position, direction, speed):
 	if is_multiplayer():
@@ -188,7 +205,7 @@ func detach_hook(id):
 		hooks[id].queue_free()
 		hooks.erase(id)
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_local")
 func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):
 	direction = direction.normalized()
 	var id = multiplayer.get_remote_sender_id()
@@ -220,3 +237,30 @@ func sync_player_state(id, position : Vector2i, velocity : Vector2,
 		hook.global_position = hookPosition
 		hook.velocity = hookVelocity
 		hook.state = hookState
+
+func send_ping_to_server():
+	if is_multiplayer():
+		_ping_send_time = Time.get_ticks_usec()
+		ping.rpc_id(0)
+
+@rpc("any_peer", "call_remote")
+func ping():
+	var id = multiplayer.get_remote_sender_id()
+	pong.rpc_id(id)
+	
+@rpc("any_peer", "call_remote")
+func pong():
+	var current_time = Time.get_ticks_usec()
+	var elapsed_time = current_time - _ping_send_time
+	
+	# one way latency is half of the total elapsed time for a two-way pingpong
+	_ping_results.append(elapsed_time / 2)
+	if _ping_results.size() > PING_RESULTS_TO_AVERAGE:
+		_ping_results.pop_front()
+	
+	var average_latency = 0
+	for latency in _ping_results:
+		average_latency += latency
+	average_latency /= _ping_results.size()
+	
+	_client_scene.ping_label.text = "Ping: %s ms " % (average_latency / 1000.0)
