@@ -30,9 +30,9 @@ func _on_viewport_resize():
 	self.zoom = _scale * Vector2(1.0, 1.0)
 	
 	if h_scale < v_scale:
-		_unzoomedViewportSize = Vector2i(BASE_WIDTH, v_scale / h_scale * BASE_HEIGHT)
+		_unzoomedViewportSize = Vector2i(int(BASE_WIDTH), int(v_scale / h_scale * BASE_HEIGHT))
 	else:
-		_unzoomedViewportSize = Vector2i(BASE_WIDTH * h_scale / v_scale, BASE_HEIGHT)
+		_unzoomedViewportSize = Vector2i(int(BASE_WIDTH * h_scale / v_scale), int(BASE_HEIGHT))
 
 func _process(_delta):	
 	if OS.has_feature("server"):
