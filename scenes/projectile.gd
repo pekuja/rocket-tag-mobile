@@ -13,6 +13,15 @@ var id : int = -1
 
 var _time_created = 0
 
+func init(player, id, position, direction, speed, lifetime):
+	self.player = player
+	self.id = id
+	self.global_position = position
+	self.velocity = direction.normalized() * speed
+	self.lifetime = lifetime
+	
+	player.projectiles[id] = self	
+
 func _ready() -> void:
 	_time_created = Time.get_ticks_msec()
 	

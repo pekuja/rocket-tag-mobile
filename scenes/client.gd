@@ -163,16 +163,8 @@ func sync_player_state(id, position : Vector2i, velocity : Vector2,
 @rpc("any_peer", "call_local")
 func sync_projectile_shot(projectile_id, position, direction, speed):
 	var id = multiplayer.get_remote_sender_id()
-	direction = direction.normalized()
 	var projectile : Projectile = projectile_scene.instantiate()
-	
-	projectile.player = get_player_character(id)
-	projectile.id = projectile_id
-	projectile.global_position = position
-	projectile.velocity = direction * speed
-	projectile.lifetime = 1.0
-		
-	projectile.player.projectiles[projectile.id] = projectile
+	projectile.init(get_player_character(id), projectile_id, position, direction, speed, 1.0)
 	
 	add_child(projectile)
 
