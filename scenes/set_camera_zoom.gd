@@ -2,6 +2,7 @@ extends Camera2D
 
 @export var local_player : LocalPlayer
 @export var tileMap : TileMapLayer
+@export var spectatorCamera : bool = false
 
 const BASE_WIDTH = 3840.0
 const BASE_HEIGHT = 2160.0
@@ -35,7 +36,7 @@ func _on_viewport_resize():
 		_unzoomedViewportSize = Vector2i(int(BASE_WIDTH * h_scale / v_scale), int(BASE_HEIGHT))
 
 func _process(_delta):	
-	if OS.has_feature("server"):
+	if spectatorCamera:
 		var average_pos = Vector2(0,0)
 		var min_pos = Vector2(INF, INF)
 		var max_pos = Vector2(-INF, -INF)

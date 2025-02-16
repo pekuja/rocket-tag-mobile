@@ -19,5 +19,6 @@ explosion_scene = ExtResource("5_lstvw")
 position = Vector2(960, 540)
 script = ExtResource("2_edbwd")
 tileMap = NodePath("../Level")
+spectatorCamera = true
 
 [node name="Level" parent="." instance=ExtResource("3_bjrr0")]

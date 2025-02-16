@@ -9,6 +9,6 @@ func _ready() -> void:
 		server_scene.name = "Sync"
 	else:
 		var scene = ResourceLoader.load("res://scenes/Client.tscn")
-		var client_scene = scene.instantiate()	
+		var client_scene = scene.instantiate()
 		add_child(client_scene)
 		client_scene.name = "Sync"
