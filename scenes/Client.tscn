@@ -1,8 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://b2ljetvkaygbm"]
+[gd_scene load_steps=12 format=3 uid="uid://b2ljetvkaygbm"]
 
 [ext_resource type="Script" path="res://scenes/client.gd" id="1_4mwrn"]
+[ext_resource type="PackedScene" uid="uid://d0oq563agkkkg" path="res://scenes/player_character.tscn" id="2_r580c"]
+[ext_resource type="PackedScene" uid="uid://bv3i730ruyfy7" path="res://scenes/projectile.tscn" id="3_d5w14"]
 [ext_resource type="PackedScene" uid="uid://ll1qk50qo6k7" path="res://scenes/local_player.tscn" id="4_gjcdf"]
+[ext_resource type="Script" path="res://scenes/set_camera_zoom.gd" id="4_kd73a"]
+[ext_resource type="PackedScene" uid="uid://bxm1sx5j25goh" path="res://scenes/grappling_hook.tscn" id="4_uiary"]
+[ext_resource type="PackedScene" uid="uid://c8kqguxgspmf6" path="res://scenes/Level.tscn" id="5_er1bc"]
 [ext_resource type="PackedScene" uid="uid://dbdtq8xotn1fj" path="res://scenes/touch_joystick_ui.tscn" id="5_uduoh"]
+[ext_resource type="PackedScene" uid="uid://b60abx4wrm4jm" path="res://scenes/explosion.tscn" id="5_y3okv"]
 
 [sub_resource type="SystemFont" id="SystemFont_np1rk"]
 
@@ -12,6 +18,10 @@ font_size = 18
 
 [node name="Client" type="Node"]
 script = ExtResource("1_4mwrn")
+remote_player_scene = ExtResource("2_r580c")
+projectile_scene = ExtResource("3_d5w14")
+grapplinghook_scene = ExtResource("4_uiary")
+explosion_scene = ExtResource("5_y3okv")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -61,3 +71,10 @@ horizontal_alignment = 2
 position = Vector2(966, 465)
 moveInput = NodePath("../CanvasLayer/Touch Joystick (Movement)")
 shootInput = NodePath("../CanvasLayer/Touch Joystick (Shooting)")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("tileMap")]
+position = Vector2(960, 540)
+script = ExtResource("4_kd73a")
+tileMap = NodePath("../Level")
+
+[node name="Level" parent="." instance=ExtResource("5_er1bc")]
