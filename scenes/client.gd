@@ -1,25 +1,14 @@
-extends Node
+extends Sync
 
 class_name ClientNode
 
-@export var remote_player_scene : PackedScene
-@export var projectile_scene: PackedScene
-@export var grapplinghook_scene : PackedScene
-@export var explosion_scene : PackedScene
-
-@onready var _peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
-
 @onready var camera = $Camera2D
-@onready var spawn_point = $Level/SpawnPoint
 @onready var local_player = $LocalPlayer
 @onready var ping_label = $CanvasLayer/Ping
 
 const SERVER_IP_ADDRESS = "192.168.0.140"
-const PORT = 28132
 const PING_INTERVAL_US = 100000
 const PING_RESULTS_TO_AVERAGE = 10
-
-var players = {}
 
 var _next_projectile_id = 0
 var _ping_send_time = 0
@@ -68,24 +57,6 @@ func get_game_time():
 	
 func get_game_time_sec():
 	return get_game_time() / 1000000.0
-	
-func create_hook(id):
-	var player = get_player_character(id)
-	var hook = GrapplingHook.get_hook(player)
-	if hook:
-		return hook
-		
-	hook = grapplinghook_scene.instantiate()
-	
-	hook.init(player)
-	
-	add_child(hook)
-	
-	return hook
-	
-func detach_hook(id):
-	var player = get_player_character(id)
-	GrapplingHook.detach_hook(player)
 
 func send_ping_to_server():
 	if is_multiplayer():
@@ -97,28 +68,6 @@ func _on_connected_to_server():
 	
 func _on_connection_failed():
 	print("Failed to connect to server")
-	
-func _on_player_connected(id):
-	print("Player ", id, " connected")
-	if id == 1: # no player character for server
-		return
-	
-	var instance = remote_player_scene.instantiate()
-	add_child(instance)
-	
-	print("Creating remote player instance for id ", id)
-	instance.id = id
-	players[id] = instance
-	
-	instance.global_position = spawn_point.global_position
-	
-func _on_player_disconnected(id):
-	print("Player ", id, " disconnected")
-	
-	detach_hook(id)
-	
-	remove_child(players[id])
-	players.erase(id)
 
 func _on_projectile_shot(position, direction, speed):
 	if is_multiplayer():
@@ -149,51 +98,6 @@ func sync_player_state(id, position : Vector2i, velocity : Vector2,
 		hook.global_position = hookPosition
 		hook.velocity = hookVelocity
 		hook.state = hookState
-		
-
-@rpc("any_peer", "call_local")
-func sync_projectile_shot(projectile_id, position, direction, speed):
-	var id = multiplayer.get_remote_sender_id()
-	var projectile : Projectile = projectile_scene.instantiate()
-	projectile.init(get_player_character(id), projectile_id, position, direction, speed, 1.0)
-	
-	add_child(projectile)
-
-@rpc("authority", "call_local")
-func sync_remove_projectile(player_id, projectile_id):
-	var player = get_player_character(player_id)
-	if player.projectiles.has(projectile_id):
-		var projectile = player.projectiles[projectile_id]
-		remove_child(projectile)
-		player.projectiles.erase(projectile_id)
-
-@rpc("authority", "call_local")
-func sync_create_explosion(position):
-	print("Create explosion")
-	var explosion = explosion_scene.instantiate()
-	explosion.global_position = position
-	
-	add_child(explosion)
-
-@rpc("any_peer", "call_local")
-func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):
-	direction = direction.normalized()
-	var id = multiplayer.get_remote_sender_id()
-	var hook = create_hook(id)
-	
-	hook.state = GrapplingHook.State.Flying
-	
-	hook.global_position = position
-	hook.velocity = direction * speed
-
-@rpc("any_peer", "call_remote")
-func sync_grapplinghook_detach():
-	var id = multiplayer.get_remote_sender_id()
-	detach_hook(id)
-
-@rpc("any_peer", "call_remote")
-func ping():
-	pass # This function is here for the RPC signature
 	
 @rpc("any_peer", "call_remote")
 func pong(game_time : int):
