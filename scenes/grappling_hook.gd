@@ -8,18 +8,38 @@ var velocity : Vector2
 signal hook_detached
 
 @onready var rope : Line2D = $Rope
-@onready var hook : Sprite2D = $HookSprite
+@onready var hook_sprite : Sprite2D = $HookSprite
 
 enum State { Inactive, Flying, Reeling, Hooked }
 
 var state : State = State.Flying
 
+static var hooks = {}
+
 const MAXIMUM_LENGTH = 2000
 const REELING_SPEED = 2000
 
+func init(player):
+	self.player = player
+	player.hook = self
+	
+	hooks[player.id] = self
+
+static func get_hook(player):
+	if hooks.has(player.id):
+		return hooks[player.id]
+	return null
+	
+static func detach_hook(player):
+	player.hook = null
+		
+	if hooks.has(player.id):
+		hooks[player.id].queue_free()
+		hooks.erase(player.id)
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	hook.rotation = Vector2(0, -1).angle_to(self.velocity)
+	hook_sprite.rotation = Vector2(0, -1).angle_to(self.velocity)
 	
 func _physics_process(delta: float) -> void:
 	var new_position = self.global_position
@@ -39,7 +59,7 @@ func _physics_process(delta: float) -> void:
 		if result:
 			self.global_position = result.position
 			state = State.Hooked
-			hook.rotation = Vector2(0, 1).angle_to(result.normal)
+			hook_sprite.rotation = Vector2(0, 1).angle_to(result.normal)
 		else:
 			self.global_position = new_position
 			

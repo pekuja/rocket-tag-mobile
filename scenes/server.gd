@@ -54,12 +54,10 @@ func _on_player_connected(id):
 func _on_player_disconnected(id):
 	print("Player ", id, " disconnected")
 	
+	detach_hook(id)
+	
 	remove_child(players[id])
 	players.erase(id)
-	
-	if hooks.has(id):
-		remove_child(hooks[id])
-		hooks.erase(id)
 	
 func _on_projectile_impact(projectile):
 	print("Projectile impact")
@@ -107,28 +105,22 @@ func sync_create_explosion(position):
 
 
 func create_hook(id):
-	if hooks.has(id):
-		return hooks[id]
-		
 	var player = get_player_character(id)
-	var hook = grapplinghook_scene.instantiate()
+	var hook = GrapplingHook.get_hook(player)
+	if hook:
+		return hook
+		
+	hook = grapplinghook_scene.instantiate()
 	
-	hook.player = player
-	player.hook = hook
+	hook.init(player)
 	
 	add_child(hook)
-	
-	hooks[id] = hook
 	
 	return hook
 	
 func detach_hook(id):
 	var player = get_player_character(id)
-	player.hook = null
-		
-	if hooks.has(id):
-		hooks[id].queue_free()
-		hooks.erase(id)
+	GrapplingHook.detach_hook(player)
 
 @rpc("any_peer", "call_local")
 func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):
