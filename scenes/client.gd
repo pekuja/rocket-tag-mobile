@@ -61,7 +61,7 @@ func get_game_time_sec():
 func send_ping_to_server():
 	if is_multiplayer():
 		_ping_send_time = Time.get_ticks_usec()
-		ping.rpc_id(0)
+		ping.rpc_id(1)
 	
 func _on_connected_to_server():
 	print("Connected to server")
