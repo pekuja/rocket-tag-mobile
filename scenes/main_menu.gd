@@ -3,7 +3,7 @@ extends Control
 @export var server_scene : PackedScene
 @export var client_scene : PackedScene
 
-@onready var _serverAddressLineEdit = $ServerAddress
+@onready var _serverAddressLineEdit = $HFlowContainer/VFlowContainer/ServerAddress
 
 const SETTINGS_FILE_NAME = "user://settings.cfg"
 
