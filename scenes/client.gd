@@ -69,6 +69,10 @@ func send_ping_to_server():
 func _on_connected_to_server():
 	print("Connected to server")
 	
+	var id = multiplayer.get_unique_id()
+	local_player.character.id = id
+	local_player.character.update_sprite()
+	
 func _on_connection_failed():
 	print("Failed to connect to server")
 

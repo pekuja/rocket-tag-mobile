@@ -2,6 +2,8 @@ extends CharacterBody2D
 
 class_name PlayerCharacter
 
+@export var sprite_frame_options: Array[SpriteFrames]
+
 @onready var _animation_player = $AnimatedSprite2D
 @onready var _healthbar = $HealthBar
 
@@ -20,6 +22,15 @@ const ROTATE_SPEED = 6.28
 const TERMINAL_VELOCITY = 1200.0
 
 var gravity: int = ProjectSettings.get("physics/2d/default_gravity")
+
+func update_sprite():
+	var sprite_frame_index = 0
+	if sprite_frame_options.size() > 0 and id >= 0:
+		sprite_frame_index = id % sprite_frame_options.size()
+	else:
+		print("id: ", id, " and number of sprite frames", sprite_frame_options.size())
+	
+	_animation_player.sprite_frames = sprite_frame_options[sprite_frame_index]
 
 func _physics_process(delta: float) -> void:
 	# TODO? Could introduce some kind of free movement, but for now I'm relying on just grappling hook.

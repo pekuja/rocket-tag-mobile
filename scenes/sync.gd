@@ -25,6 +25,7 @@ func _on_player_connected(id):
 	print("Creating remote player instance for id ", id)
 	instance.id = id
 	players[id] = instance
+	instance.update_sprite()
 	
 	instance.global_position = spawn_point.global_position
 	
