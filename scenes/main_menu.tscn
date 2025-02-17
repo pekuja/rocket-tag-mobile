@@ -16,7 +16,7 @@ script = ExtResource("1_ml288")
 server_scene = ExtResource("2_xc8l4")
 client_scene = ExtResource("3_6bhb5")
 
-[node name="Button" type="Button" parent="."]
+[node name="JoinButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 740.0
 offset_top = 347.0
@@ -25,7 +25,7 @@ offset_bottom = 491.0
 theme = ExtResource("1_0x6nd")
 text = "Join game"
 
-[node name="Button2" type="Button" parent="."]
+[node name="HostButton" type="Button" parent="."]
 layout_mode = 0
 offset_left = 740.0
 offset_top = 629.0
@@ -37,15 +37,15 @@ text = "Host game
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
-offset_left = 692.0
-offset_top = 85.0
-offset_right = 1251.0
-offset_bottom = 175.0
+offset_left = 675.0
+offset_top = 58.0
+offset_right = 1234.0
+offset_bottom = 148.0
 theme = ExtResource("1_0x6nd")
 text = "Server address:"
 horizontal_alignment = 1
 
-[node name="LineEdit" type="LineEdit" parent="."]
+[node name="ServerAddress" type="LineEdit" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -59,7 +59,7 @@ offset_bottom = -239.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_0x6nd")
-text = "192.168.0.140"
+text = "127.0.0.1"
 
-[connection signal="pressed" from="Button" to="." method="_on_join_game_pressed"]
-[connection signal="pressed" from="Button2" to="." method="_on_host_game_pressed"]
+[connection signal="pressed" from="JoinButton" to="." method="_on_join_game_pressed"]
+[connection signal="pressed" from="HostButton" to="." method="_on_host_game_pressed"]

@@ -6,9 +6,10 @@ class_name ClientNode
 @onready var local_player = $LocalPlayer
 @onready var ping_label = $CanvasLayer/Ping
 
-const SERVER_IP_ADDRESS = "192.168.0.140"
 const PING_INTERVAL_US = 100000
 const PING_RESULTS_TO_AVERAGE = 10
+
+@export var server_address = "127.0.0.1"
 
 var _next_projectile_id = 0
 var _ping_send_time = 0
@@ -23,7 +24,9 @@ func _ready() -> void:
 			
 	camera.local_player = local_player
 	
-	_peer.create_client(SERVER_IP_ADDRESS, PORT)
+	print("Connecting to server at ", server_address)
+	
+	_peer.create_client(server_address, PORT)
 	multiplayer.multiplayer_peer = _peer
 	
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
