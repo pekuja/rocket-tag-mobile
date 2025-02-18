@@ -64,16 +64,20 @@ func _process(_delta: float) -> void:
 		_animation_player.play("stand")
 		
 func explosion_hit(pos : Vector2):
-	var diff = global_position - pos
-	
-	var force_magnitude = 100000.0 / diff.length()
-	var force_direction = diff.normalized()
-	
-	velocity += force_magnitude * force_direction
+	if is_multiplayer_authority():
+		var diff = global_position - pos
 		
-	var damage = round(5000 / diff.length())
-	health = clamp(health - damage, 0, 100)
-	
+		var force_magnitude = 100000.0 / diff.length()
+		var force_direction = diff.normalized()
+		
+		velocity += force_magnitude * force_direction
+			
+		var damage = round(5000 / diff.length())
+		health = clamp(health - damage, 0, 100)
+		
+		update_healthbar()
+		
+func update_healthbar():
 	_healthbar.points[1].x = health
 	
 	

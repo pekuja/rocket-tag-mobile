@@ -90,13 +90,16 @@ func _on_grapplinghook_detach():
 		sync_grapplinghook_detach.rpc()
 
 @rpc("authority", "call_remote")
-func sync_player_state(id, position : Vector2i, velocity : Vector2,
+func sync_player_state(id, health : int,
+		position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	var player = get_player_character(id)
 	
 	if player:
 		player.global_position = position
 		player.velocity = velocity
+		player.health = health
+		player.update_healthbar()
 		
 	if hookState == GrapplingHook.State.Inactive:
 		detach_hook(id)

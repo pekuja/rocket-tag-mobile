@@ -41,7 +41,7 @@ func get_player_character(id):
 	return players[id]
 	
 @rpc("authority", "call_remote")
-func sync_player_state(id, position : Vector2i, velocity : Vector2,
+func sync_player_state(id, health : int, position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	pass # This function is Here for the RPC signature
 	

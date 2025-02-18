@@ -21,7 +21,8 @@ func _process(_delta) -> void:
 			hookPosition = player_character.hook.position
 			hookVelocity = player_character.hook.velocity
 		sync_player_state.rpc(
-			playerId, player_character.global_position, player_character.velocity,
+			playerId, player_character.health,
+			player_character.global_position, player_character.velocity,
 			hookState, hookPosition, hookVelocity)
 	
 func _on_projectile_impact(projectile):
