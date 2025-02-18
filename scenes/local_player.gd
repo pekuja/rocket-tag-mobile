@@ -31,6 +31,9 @@ const ROTATE_SPEED = 6.28
 const TERMINAL_VELOCITY = 1200.0
 	
 func _process(_delta: float) -> void:	
+	if not character.is_alive():
+		return
+		
 	if shootInput.is_just_released:
 		var direction = shootInput.joystick_position
 		if direction.length() > SHOOT_THRESHOLD:

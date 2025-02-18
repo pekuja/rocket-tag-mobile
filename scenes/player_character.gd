@@ -6,6 +6,7 @@ class_name PlayerCharacter
 
 @onready var _animation_player = $AnimatedSprite2D
 @onready var _healthbar = $HealthBar
+@onready var _collision_shape = $CollisionShape2D
 
 var hook : Node2D
 var projectiles = {}
@@ -31,8 +32,14 @@ func update_sprite():
 		print("id: ", id, " and number of sprite frames", sprite_frame_options.size())
 	
 	_animation_player.sprite_frames = sprite_frame_options[sprite_frame_index]
+	
+func is_alive():
+	return health > 0
 
 func _physics_process(delta: float) -> void:
+	if health == 0:
+		return
+	
 	# TODO? Could introduce some kind of free movement, but for now I'm relying on just grappling hook.
 	#if moveInput.is_pressed and character.is_on_floor():
 		#character.velocity.x = move_toward(character.velocity.x, moveInput.joystick_position.x * SPEED, ACCELERATE * delta)
@@ -56,12 +63,20 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _process(_delta: float) -> void:
-	if abs(velocity.x) > 0 and is_on_floor():
-		_animation_player.play("walk")
-	elif not is_on_floor():
-		_animation_player.play("jump")
+	if health == 0:
+		visible = false
+		_collision_shape.disabled = true
+		if hook:
+			GrapplingHook.detach_hook(self)
 	else:
-		_animation_player.play("stand")
+		visible = true
+		_collision_shape.disabled = false
+		if abs(velocity.x) > 0 and is_on_floor():
+			_animation_player.play("walk")
+		elif not is_on_floor():
+			_animation_player.play("jump")
+		else:
+			_animation_player.play("stand")
 		
 func explosion_hit(pos : Vector2):
 	if is_multiplayer_authority():

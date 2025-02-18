@@ -38,8 +38,9 @@ func _on_projectile_expired(projectile):
 func sync_projectile_shot(projectile_id, position, direction, speed):
 	var projectile = create_projectile(projectile_id, position, direction, speed)
 	
-	projectile.projectile_impact.connect(_on_projectile_impact)
-	projectile.projectile_expired.connect(_on_projectile_expired)
+	if projectile:
+		projectile.projectile_impact.connect(_on_projectile_impact)
+		projectile.projectile_expired.connect(_on_projectile_expired)
 
 @rpc("any_peer", "call_remote")
 func ping():

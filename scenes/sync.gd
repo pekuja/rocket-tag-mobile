@@ -47,15 +47,20 @@ func sync_player_state(id, health : int, position : Vector2i, velocity : Vector2
 	
 func create_projectile(projectile_id, position, direction, speed):
 	var id = multiplayer.get_remote_sender_id()
+	var player = get_player_character(id)
+	
+	if not player.is_alive():
+		return null
+	
 	var projectile : Projectile = projectile_scene.instantiate()
-	projectile.init(get_player_character(id), projectile_id, position, direction, speed, 1.0)
+	projectile.init(player, projectile_id, position, direction, speed, 1.0)
 	
 	add_child(projectile)
 	
 	return projectile
 	
 @rpc("any_peer", "call_local")
-func sync_projectile_shot(projectile_id, position, direction, speed):
+func sync_projectile_shot(projectile_id, position, direction, speed):		
 	create_projectile(projectile_id, position, direction, speed)
 
 @rpc("authority", "call_local")
@@ -94,8 +99,13 @@ func detach_hook(id):
 
 @rpc("any_peer", "call_local")
 func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):
-	direction = direction.normalized()
 	var id = multiplayer.get_remote_sender_id()
+	var player = get_player_character(id)
+	
+	if not player.is_alive():
+		return
+	
+	direction = direction.normalized()
 	var hook = create_hook(id)
 	
 	hook.state = GrapplingHook.State.Flying
