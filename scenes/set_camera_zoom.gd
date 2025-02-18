@@ -37,7 +37,6 @@ func _on_viewport_resize():
 
 func _process(_delta):
 	if spectatorCamera or (local_player and not local_player.character.is_alive()):
-		var average_pos = Vector2(0,0)
 		var min_pos = Vector2(INF, INF)
 		var max_pos = Vector2(-INF, -INF)
 		
@@ -47,24 +46,21 @@ func _process(_delta):
 		for player : CharacterBody2D in players:
 			if player.is_alive():
 				num_live_players += 1
-				average_pos += player.global_position
 				min_pos.x = min(min_pos.x, player.global_position.x)
 				max_pos.x = max(max_pos.x, player.global_position.x)
 				min_pos.y = min(min_pos.y, player.global_position.y)
 				max_pos.y = max(max_pos.y, player.global_position.y)
 					
-		if num_live_players > 0:	
-			average_pos /= num_live_players
-			
+		if num_live_players > 0:				
 			min_pos -= BORDER_SIZE
 			max_pos += BORDER_SIZE
 			
-			self.global_position = average_pos
+			self.global_position = (min_pos + max_pos) / 2
 			var new_zoom = 1.0
 			if max_pos.x > min_pos.x:
 				new_zoom = minf(new_zoom, BASE_WIDTH / (max_pos.x - min_pos.x))
 			if max_pos.y > min_pos.y:
-				new_zoom = minf(new_zoom, BASE_WIDTH / (max_pos.y - min_pos.y))
+				new_zoom = minf(new_zoom, BASE_HEIGHT / (max_pos.y - min_pos.y))
 				
 			self.zoom = new_zoom * _scale * Vector2(1.0, 1.0)
 	elif local_player:
