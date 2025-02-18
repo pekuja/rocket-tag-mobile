@@ -8,7 +8,7 @@ class_name Sync
 
 @onready var _peer : ENetMultiplayerPeer = ENetMultiplayerPeer.new()
 
-@onready var spawn_point = $Level/SpawnPoint
+@onready var spawn_points_parent = $Level/SpawnPoints
 
 const PORT = 28132
 
@@ -27,7 +27,11 @@ func _on_player_connected(id):
 	players[id] = instance
 	instance.update_sprite()
 	
-	instance.global_position = spawn_point.global_position
+	if is_multiplayer_authority():
+		var spawn_points = spawn_points_parent.get_children()
+		if not spawn_points.is_empty():
+			var spawn_point_index = randi_range(0, spawn_points.size() - 1)
+			instance.global_position = spawn_points[spawn_point_index].global_position
 	
 func _on_player_disconnected(id):
 	print("Player ", id, " disconnected")
