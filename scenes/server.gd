@@ -1,6 +1,7 @@
 extends Sync
 
 const MAX_CONNECTIONS = 32
+const TIME_TO_RESPAWN = 5.0
 
 func _ready() -> void:
 	_peer.create_server(PORT, MAX_CONNECTIONS)
@@ -10,7 +11,7 @@ func _ready() -> void:
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
 
-func _process(_delta) -> void:
+func _process(delta) -> void:
 	for playerId in players:
 		var player_character = players[playerId]
 		var hookState : GrapplingHook.State = GrapplingHook.State.Inactive
@@ -20,11 +21,24 @@ func _process(_delta) -> void:
 			hookState = player_character.hook.state
 			hookPosition = player_character.hook.position
 			hookVelocity = player_character.hook.velocity
+		
+		if player_character.health == 0:
+			if player_character.respawn_timer <= 0:
+				player_character.respawn_timer = TIME_TO_RESPAWN
+			else:
+				player_character.respawn_timer -= delta
+				
+				if player_character.respawn_timer <= 0:
+					player_character.health = 100
+					player_character.update_healthbar()
+					player_character.global_position = get_random_spawn_point()
+					player_character.velocity = Vector2(0.0, 0.0)
+		
 		sync_player_state.rpc(
 			playerId, player_character.health,
 			player_character.global_position, player_character.velocity,
 			hookState, hookPosition, hookVelocity)
-	
+
 func _on_projectile_impact(projectile):
 	print("Projectile impact")
 	sync_create_explosion.rpc(projectile.global_position)

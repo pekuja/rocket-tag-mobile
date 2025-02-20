@@ -13,6 +13,7 @@ var projectiles = {}
 var id = -1
 
 var health = 100
+var respawn_timer = 0.0
 
 const SPEED = 300.0
 const ACCELERATE = 1200.0

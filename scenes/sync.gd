@@ -13,6 +13,14 @@ class_name Sync
 const PORT = 28132
 
 var players = {}
+
+func get_random_spawn_point() -> Vector2i:
+	var spawn_points = spawn_points_parent.get_children()
+	if not spawn_points.is_empty():
+		var spawn_point_index = randi_range(0, spawn_points.size() - 1)
+		return spawn_points[spawn_point_index].global_position
+	
+	return Vector2i(0,0)
 	
 func _on_player_connected(id):
 	print("Player ", id, " connected")
@@ -28,10 +36,7 @@ func _on_player_connected(id):
 	instance.update_sprite()
 	
 	if is_multiplayer_authority():
-		var spawn_points = spawn_points_parent.get_children()
-		if not spawn_points.is_empty():
-			var spawn_point_index = randi_range(0, spawn_points.size() - 1)
-			instance.global_position = spawn_points[spawn_point_index].global_position
+		instance.global_position = get_random_spawn_point()
 	
 func _on_player_disconnected(id):
 	print("Player ", id, " disconnected")
