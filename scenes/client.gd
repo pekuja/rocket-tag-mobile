@@ -31,10 +31,11 @@ func _ready() -> void:
 		_peer.create_server(PORT, MAX_CONNECTIONS)
 		multiplayer.multiplayer_peer = _peer
 		
+		canvas_layer.remove_child(ping_label)
+		
 		if OS.has_feature("server"):
 			# Dedicated server. Get rid of local player and some UI.
 			remove_child(local_player)
-			canvas_layer.remove_child(ping_label)
 			canvas_layer.remove_child(joystick_left)
 			canvas_layer.remove_child(joystick_right)
 			camera.spectatorCamera = true
