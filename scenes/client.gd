@@ -13,6 +13,8 @@ class_name ClientNode
 const PING_INTERVAL_US = 100000
 const PING_RESULTS_TO_AVERAGE = 10
 
+const STATE_SYNC_INTERVAL_US = 100000
+
 const MAX_CONNECTIONS = 32
 const TIME_TO_RESPAWN = 5.0
 
@@ -25,6 +27,7 @@ var _ping_send_time = 0
 var _waiting_for_ping = false
 var _ping_results = []
 var _game_time_offsets = []
+var _last_state_sync_time = 0
 
 func _ready() -> void:
 	if is_host:
@@ -75,6 +78,12 @@ func _process(delta) -> void:
 	if is_multiplayer_authority():
 		var game_time = Time.get_ticks_usec()
 		
+		var send_state_sync = false
+		
+		if game_time - _last_state_sync_time >= STATE_SYNC_INTERVAL_US:
+			send_state_sync = true
+			_last_state_sync_time = game_time
+		
 		for playerId in players:
 			var player_character = players[playerId]
 			var hookState : GrapplingHook.State = GrapplingHook.State.Inactive
@@ -85,22 +94,26 @@ func _process(delta) -> void:
 				hookPosition = player_character.hook.position
 				hookVelocity = player_character.hook.velocity
 			
+			var health_update_needed = false
 			if player_character.health == 0:
 				if player_character.respawn_timer <= 0:
+					health_update_needed = true
 					player_character.respawn_timer = TIME_TO_RESPAWN
 				else:
 					player_character.respawn_timer -= delta
 					
 					if player_character.respawn_timer <= 0:
+						health_update_needed = true
 						player_character.health = 100
 						player_character.update_healthbar()
 						player_character.global_position = get_random_spawn_point()
 						player_character.velocity = Vector2(0.0, 0.0)
 			
-			sync_player_state.rpc(
-				game_time, playerId, player_character.health, player_character.score,
-				player_character.global_position, player_character.velocity,
-				hookState, hookPosition, hookVelocity)
+			if send_state_sync or health_update_needed:
+				sync_player_state.rpc(
+					game_time, playerId, player_character.health, player_character.score,
+					player_character.global_position, player_character.velocity,
+					hookState, hookPosition, hookVelocity)
 	else:
 		if not _waiting_for_ping and Time.get_ticks_usec() - _ping_send_time >= PING_INTERVAL_US:
 			send_ping_to_server()
