@@ -3,7 +3,7 @@ extends Sync
 class_name ClientNode
 
 @onready var camera = $Camera2D
-@onready var local_player = $LocalPlayer
+@onready var local_player : LocalPlayer = $LocalPlayer
 @onready var ping_label = $CanvasLayer/Ping
 @onready var scoreboard = $CanvasLayer/Scoreboard
 
@@ -38,25 +38,14 @@ func _ready() -> void:
 func _process(_delta) -> void:
 	if not _waiting_for_ping and Time.get_ticks_usec() - _ping_send_time >= PING_INTERVAL_US:
 		send_ping_to_server()
-		
-func _on_player_connected(id : int):
-	super(id)
-	# + 1 for local player
-	scoreboard.set_num_of_players(players.size() + 1)
 	
 func _on_player_disconnected(id : int):
 	super(id)
-	# + 1 for local player
-	scoreboard.set_num_of_players(players.size() + 1)
+	
+	scoreboard.set_num_of_players(players.size())
 
 func is_multiplayer():
 	return _peer.get_connection_status() == ENetMultiplayerPeer.CONNECTION_CONNECTED
-
-func get_player_character(id : int):
-	if id == multiplayer.get_unique_id():
-		return local_player.character
-	else:
-		return players[id]
 	
 func get_average_game_time_offset():
 	if _game_time_offsets.is_empty():
@@ -84,6 +73,21 @@ func _on_connected_to_server():
 	local_player.character.id = id
 	local_player.character.update_sprite()
 	
+	player_join_game.rpc_id(1)
+
+@rpc("authority", "call_remote")
+func sync_player_list(new_player_ids : Array[int]):	
+	print("Player list synced: ", new_player_ids)
+	player_ids = new_player_ids
+	for player_id in player_ids:
+		if player_id == multiplayer.get_unique_id():
+			players[player_id] = local_player.character
+		else:
+			create_player(player_id)
+	print("Done creating player characters")
+	
+	scoreboard.set_num_of_players(players.size())
+	
 func _on_connection_failed():
 	print("Failed to connect to server")
 
@@ -101,15 +105,7 @@ func _on_grapplinghook_detach():
 		sync_grapplinghook_detach.rpc()
 		
 func get_player_index(player_id : int):
-	if player_id == multiplayer.get_unique_id():
-		return 0
-	var index = 1
-	for id in players.keys():
-		if id == player_id:
-			return index
-		index += 1
-		
-	return -1
+	return player_ids.find(player_id)
 
 @rpc("authority", "call_remote")
 func sync_player_state(id : int, health : int, score : int, 
@@ -125,13 +121,13 @@ func sync_player_state(id : int, health : int, score : int,
 		player.score = score
 		scoreboard.update_score_display(get_player_index(id), player.sprite_frame_index, score)
 		
-	if hookState == GrapplingHook.State.Inactive:
-		detach_hook(id)
-	else:
-		var hook = create_hook(id)
-		hook.global_position = hookPosition
-		hook.velocity = hookVelocity
-		hook.state = hookState
+		if hookState == GrapplingHook.State.Inactive:
+			detach_hook(id)
+		else:
+			var hook = create_hook(id)
+			hook.global_position = hookPosition
+			hook.velocity = hookVelocity
+			hook.state = hookState
 	
 @rpc("any_peer", "call_remote")
 func pong(game_time : int):

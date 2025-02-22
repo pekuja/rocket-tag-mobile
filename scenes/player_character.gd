@@ -38,8 +38,6 @@ func update_sprite():
 	else:
 		print("id: ", id, " and number of sprite frames", sprite_frame_options.size())
 	
-	print("Updating sprite for player id %s with color index %s" % [id, sprite_frame_index])
-	
 	_animation_player.sprite_frames = sprite_frame_options[sprite_frame_index]
 	
 func is_alive():

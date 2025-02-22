@@ -20,7 +20,6 @@ font_size = 18
 
 [node name="Client" type="Node"]
 script = ExtResource("1_4mwrn")
-server_address = null
 remote_player_scene = ExtResource("2_r580c")
 projectile_scene = ExtResource("3_d5w14")
 grapplinghook_scene = ExtResource("4_uiary")

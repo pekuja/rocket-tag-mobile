@@ -13,6 +13,7 @@ class_name Sync
 const PORT = 28132
 
 var players = {}
+var player_ids : Array[int]
 
 func get_random_spawn_point() -> Vector2i:
 	var spawn_points = spawn_points_parent.get_children()
@@ -24,7 +25,32 @@ func get_random_spawn_point() -> Vector2i:
 	
 func _on_player_connected(id : int):
 	print("Player ", id, " connected")
-	if id == 1: # no player character for server
+	
+func _on_player_disconnected(id : int):
+	print("Player ", id, " disconnected")
+	
+	var player = get_player_character(id)
+	
+	if player:
+		detach_hook(id)
+		
+		remove_child(players[id])
+		players.erase(id)
+		player_ids.erase(id)
+	
+func _on_player_died(victim, killer):
+	if victim == killer:
+		killer.score -= 1
+	else:
+		killer.score += 1
+
+func get_player_character(id : int):
+	if players.has(id):
+		return players[id]
+	return null
+	
+func create_player(id):
+	if get_player_character(id):
 		return
 	
 	var instance : PlayerCharacter = remote_player_scene.instantiate()
@@ -39,22 +65,17 @@ func _on_player_connected(id : int):
 		instance.global_position = get_random_spawn_point()
 		instance.player_died.connect(_on_player_died)
 	
-func _on_player_disconnected(id : int):
-	print("Player ", id, " disconnected")
+@rpc("any_peer", "call_remote")
+func player_join_game():
+	var id = multiplayer.get_remote_sender_id()
+	print("Player %s joined game" % id)
+	create_player(id)
 	
-	detach_hook(id)
-	
-	remove_child(players[id])
-	players.erase(id)
-	
-func _on_player_died(victim, killer):
-	if victim == killer:
-		killer.score -= 1
-	else:
-		killer.score += 1
-
-func get_player_character(id : int):
-	return players[id]
+	player_ids.append(id)
+		
+@rpc("authority", "call_remote")
+func sync_player_list(new_player_ids : Array[int]):
+	pass
 	
 @rpc("authority", "call_remote")
 func sync_player_state(id : int, health : int, score : int, position : Vector2i, velocity : Vector2,
@@ -112,7 +133,8 @@ func create_hook(id : int):
 	
 func detach_hook(id : int):
 	var player = get_player_character(id)
-	GrapplingHook.detach_hook(player)
+	if player:
+		GrapplingHook.detach_hook(player)
 
 @rpc("any_peer", "call_local")
 func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):

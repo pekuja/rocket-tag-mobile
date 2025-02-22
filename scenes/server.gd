@@ -47,7 +47,13 @@ func _on_projectile_impact(projectile):
 func _on_projectile_expired(projectile):
 	print("Projectile expired")
 	sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
+
+@rpc("any_peer", "call_remote", "reliable")
+func player_join_game():
+	super()
 	
+	sync_player_list.rpc(player_ids)
+
 @rpc("any_peer", "call_local")
 func sync_projectile_shot(projectile_id, position, direction, speed):
 	var projectile = create_projectile(projectile_id, position, direction, speed)
