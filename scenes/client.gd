@@ -73,6 +73,8 @@ func _ready() -> void:
 	
 func _process(delta) -> void:
 	if is_multiplayer_authority():
+		var game_time = Time.get_ticks_usec()
+		
 		for playerId in players:
 			var player_character = players[playerId]
 			var hookState : GrapplingHook.State = GrapplingHook.State.Inactive
@@ -96,7 +98,7 @@ func _process(delta) -> void:
 						player_character.velocity = Vector2(0.0, 0.0)
 			
 			sync_player_state.rpc(
-				playerId, player_character.health, player_character.score,
+				game_time, playerId, player_character.health, player_character.score,
 				player_character.global_position, player_character.velocity,
 				hookState, hookPosition, hookVelocity)
 	else:
@@ -139,7 +141,7 @@ func _on_connected_to_server():
 	
 	player_join_game.rpc_id(1)
 
-@rpc("authority", "call_remote")
+@rpc("authority", "call_remote", "reliable")
 func sync_player_list(new_player_ids : Array[int]):	
 	print("Player list synced: ", new_player_ids)
 	player_ids = new_player_ids
@@ -155,9 +157,9 @@ func sync_player_list(new_player_ids : Array[int]):
 func _on_connection_failed():
 	print("Failed to connect to server")
 
-func _on_projectile_shot(position, direction, speed):
+func _on_projectile_shot(target_position):
 	if is_multiplayer():
-		sync_projectile_shot.rpc(_next_projectile_id, position, direction, speed)
+		sync_projectile_shot.rpc(_next_projectile_id, target_position)
 		_next_projectile_id += 1
 		
 
@@ -170,9 +172,9 @@ func _on_projectile_expired(projectile):
 	print("Projectile expired")
 	sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
 
-func _on_grapplinghook_shot(position, direction, speed):
+func _on_grapplinghook_shot(target_pos):
 	if is_multiplayer():
-		sync_grapplinghook_shot.rpc(position, direction, speed)
+		sync_grapplinghook_shot.rpc(target_pos)
 	
 func _on_grapplinghook_detach():
 	if is_multiplayer():
@@ -190,8 +192,8 @@ func _on_player_died(victim, killer):
 func get_player_index(player_id : int):
 	return player_ids.find(player_id)
 
-@rpc("authority", "call_remote")
-func sync_player_state(id : int, health : int, score : int, 
+@rpc("authority", "call_remote", "unreliable_ordered")
+func sync_player_state(game_time : int, id : int, health : int, score : int, 
 		position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	var player = get_player_character(id)
@@ -202,6 +204,7 @@ func sync_player_state(id : int, health : int, score : int,
 		player.health = health
 		player.update_healthbar()
 		player.score = score
+				
 		scoreboard.update_score_display(get_player_index(id), player.sprite_frame_index, score)
 		
 		if hookState == GrapplingHook.State.Inactive:
@@ -211,6 +214,23 @@ func sync_player_state(id : int, health : int, score : int,
 			hook.global_position = hookPosition
 			hook.velocity = hookVelocity
 			hook.state = hookState
+		
+		# Account for network latency
+		var local_game_time = get_game_time()
+		var total_delta = local_game_time - game_time
+		if total_delta > 0:
+			var single_delta = 1000000 / Engine.physics_ticks_per_second
+			var delta_sec = single_delta / 1000000.0
+			var frames = total_delta / single_delta
+			if frames > 0:
+				print("Catching up player simulation for ", frames, " frames")
+				while frames > 0:
+					frames -= 1
+					player._physics_process(delta_sec)
+					
+					var hook = GrapplingHook.get_hook(player)
+					if hook:
+						hook._physics_process(delta_sec)
 
 @rpc("any_peer", "call_remote", "reliable")
 func player_join_game():
@@ -225,23 +245,23 @@ func player_join_game():
 		var player = get_player_character(id)
 		scoreboard.update_score_display(get_player_index(id), player.sprite_frame_index, 0)
 
-@rpc("any_peer", "call_local")
-func sync_projectile_shot(projectile_id, position, direction, speed):
+@rpc("any_peer", "call_local", "reliable")
+func sync_projectile_shot(projectile_id, target_position):
 	if is_multiplayer_authority():
-		var projectile = create_projectile(projectile_id, position, direction, speed)
+		var projectile = create_projectile(projectile_id, target_position)
 		
 		if projectile:
 			projectile.projectile_impact.connect(_on_projectile_impact)
 			projectile.projectile_expired.connect(_on_projectile_expired)
 	else:
-		create_projectile(projectile_id, position, direction, speed)
+		create_projectile(projectile_id, target_position)
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "reliable")
 func ping():
 	var id = multiplayer.get_remote_sender_id()
 	pong.rpc_id(id, Time.get_ticks_usec())
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "reliable")
 func pong(game_time : int):
 	var current_time = Time.get_ticks_usec()
 	var elapsed_time = current_time - _ping_send_time

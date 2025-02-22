@@ -17,6 +17,7 @@ var state : State = State.Flying
 static var hooks = {}
 
 const MAXIMUM_LENGTH = 2000
+const FLYING_SPEED = 1600
 const REELING_SPEED = 2000
 
 func init(player):

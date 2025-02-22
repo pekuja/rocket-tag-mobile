@@ -62,7 +62,7 @@ func create_player(id):
 		instance.global_position = get_random_spawn_point()
 		instance.player_died.connect(_on_player_died)
 	
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "reliable")
 func player_join_game():
 	var id = multiplayer.get_remote_sender_id()
 	print("Player %s joined game" % id)
@@ -70,16 +70,17 @@ func player_join_game():
 	
 	player_ids.append(id)
 		
-@rpc("authority", "call_remote")
+@rpc("authority", "call_remote", "reliable")
 func sync_player_list(new_player_ids : Array[int]):
 	pass
 	
-@rpc("authority", "call_remote")
-func sync_player_state(id : int, health : int, score : int, position : Vector2i, velocity : Vector2,
+@rpc("authority", "call_remote", "unreliable_ordered")
+func sync_player_state(game_time : int, id : int, health : int, score : int,
+		position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	pass # This function is Here for the RPC signature
 	
-func create_projectile(projectile_id, position, direction, speed):
+func create_projectile(projectile_id, target_position):
 	var id = multiplayer.get_remote_sender_id()
 	var player = get_player_character(id)
 	
@@ -87,17 +88,17 @@ func create_projectile(projectile_id, position, direction, speed):
 		return null
 	
 	var projectile : Projectile = projectile_scene.instantiate()
-	projectile.init(player, projectile_id, position, direction, speed, 1.0)
+	projectile.init(player, projectile_id, target_position)
 	
 	add_child(projectile)
 	
 	return projectile
 	
-@rpc("any_peer", "call_local")
-func sync_projectile_shot(projectile_id, position, direction, speed):
-	create_projectile(projectile_id, position, direction, speed)
+@rpc("any_peer", "call_local", "reliable")
+func sync_projectile_shot(projectile_id, target_position):
+	create_projectile(projectile_id, target_position)
 
-@rpc("authority", "call_local")
+@rpc("authority", "call_local", "reliable")
 func sync_remove_projectile(player_id : int, projectile_id : int):
 	var player = get_player_character(player_id)
 	if player.projectiles.has(projectile_id):
@@ -105,7 +106,7 @@ func sync_remove_projectile(player_id : int, projectile_id : int):
 		remove_child(projectile)
 		player.projectiles.erase(projectile_id)
 		
-@rpc("authority", "call_local")
+@rpc("authority", "call_local", "reliable")
 func sync_create_explosion(player_id : int, position):
 	print("Create explosion")
 	var explosion : Explosion = explosion_scene.instantiate()
@@ -133,32 +134,32 @@ func detach_hook(id : int):
 	if player:
 		GrapplingHook.detach_hook(player)
 
-@rpc("any_peer", "call_local")
-func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : float):
+@rpc("any_peer", "call_local", "reliable")
+func sync_grapplinghook_shot(target_pos : Vector2i):
 	var id = multiplayer.get_remote_sender_id()
 	var player = get_player_character(id)
 	
 	if not player.is_alive():
 		return
 	
-	direction = direction.normalized()
 	var hook = create_hook(id)
 	
 	hook.state = GrapplingHook.State.Flying
 	
-	hook.global_position = position
-	hook.velocity = direction * speed
+	hook.global_position = player.global_position
+	var direction : Vector2 = (Vector2(target_pos) - player.global_position).normalized()
+	hook.velocity = direction * GrapplingHook.FLYING_SPEED
 
-@rpc("any_peer", "call_local")
+@rpc("any_peer", "call_local", "reliable")
 func sync_grapplinghook_detach():
 	var id = multiplayer.get_remote_sender_id()
 	detach_hook(id)
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "reliable")
 func ping():
 	pass # This function is here for the RPC signature
 	
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_remote", "reliable")
 func pong(game_time : int):
 	pass # This function is here for the RPC signature
 	

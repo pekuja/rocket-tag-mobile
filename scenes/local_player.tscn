@@ -5,8 +5,6 @@
 
 [node name="LocalPlayer" type="Node2D"]
 script = ExtResource("1_wco7s")
-projectileSpeed = 1600.0
-grapplingHookSpeed = 1600.0
 
 [node name="AimGuide" type="Line2D" parent="."]
 visible = false

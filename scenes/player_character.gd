@@ -7,6 +7,7 @@ class_name PlayerCharacter
 @onready var _animation_player = $AnimatedSprite2D
 @onready var _healthbar = $HealthBar
 @onready var _collision_shape = $CollisionShape2D
+@onready var projectile_spawn_point = $GunSprite/ProjectileSpawnPoint
 
 signal player_died(victim: PlayerCharacter, killer : PlayerCharacter)
 
@@ -50,12 +51,7 @@ func _physics_process(delta: float) -> void:
 	# TODO? Could introduce some kind of free movement, but for now I'm relying on just grappling hook.
 	#if moveInput.is_pressed and character.is_on_floor():
 		#character.velocity.x = move_toward(character.velocity.x, moveInput.joystick_position.x * SPEED, ACCELERATE * delta)
-	
-	if velocity.x < 0:
-		_animation_player.flip_h = true
-	else:
-		_animation_player.flip_h = false
-		
+			
 	if is_on_floor():
 		velocity.x = move_toward(velocity.x, 0, DECELERATE * delta)
 
@@ -78,6 +74,12 @@ func _process(_delta: float) -> void:
 	else:
 		visible = true
 		_collision_shape.disabled = false
+		
+		if velocity.x < 0:
+			_animation_player.flip_h = true
+		else:
+			_animation_player.flip_h = false
+		
 		if abs(velocity.x) > 0 and is_on_floor():
 			_animation_player.play("walk")
 		elif not is_on_floor():

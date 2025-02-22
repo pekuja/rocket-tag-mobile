@@ -13,14 +13,18 @@ var id : int = -1
 
 var _time_created = 0
 
-func init(player, id, position, direction, speed, lifetime):
+const PROJECTILE_SPEED = 1600.0
+const PROJECTILE_LIFETIME = 1.0
+
+func init(player : PlayerCharacter, id, target_position):
 	self.player = player
 	self.id = id
-	self.global_position = position
-	self.velocity = direction.normalized() * speed
-	self.lifetime = lifetime
+	self.global_position = player.projectile_spawn_point.global_position
+	var direction = (target_position - self.global_position).normalized()
+	self.velocity = direction * PROJECTILE_SPEED
+	self.lifetime = PROJECTILE_LIFETIME
 	
-	player.projectiles[id] = self	
+	player.projectiles[id] = self
 
 func _ready() -> void:
 	_time_created = Time.get_ticks_msec()
