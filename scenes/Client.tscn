@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b2ljetvkaygbm"]
+[gd_scene load_steps=14 format=3 uid="uid://b2ljetvkaygbm"]
 
 [ext_resource type="Script" path="res://scenes/client.gd" id="1_4mwrn"]
 [ext_resource type="PackedScene" uid="uid://d0oq563agkkkg" path="res://scenes/player_character.tscn" id="2_r580c"]
@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" uid="uid://c8kqguxgspmf6" path="res://scenes/Level.tscn" id="5_er1bc"]
 [ext_resource type="PackedScene" uid="uid://dbdtq8xotn1fj" path="res://scenes/touch_joystick_ui.tscn" id="5_uduoh"]
 [ext_resource type="PackedScene" uid="uid://b60abx4wrm4jm" path="res://scenes/explosion.tscn" id="5_y3okv"]
+[ext_resource type="Script" path="res://scenes/scoreboard.gd" id="7_noch3"]
+[ext_resource type="PackedScene" uid="uid://cvs8eeiltwlsk" path="res://scenes/player_score_display.tscn" id="8_2qdsn"]
 
 [sub_resource type="SystemFont" id="SystemFont_np1rk"]
 
@@ -18,6 +20,7 @@ font_size = 18
 
 [node name="Client" type="Node"]
 script = ExtResource("1_4mwrn")
+server_address = null
 remote_player_scene = ExtResource("2_r580c")
 projectile_scene = ExtResource("3_d5w14")
 grapplinghook_scene = ExtResource("4_uiary")
@@ -66,6 +69,14 @@ offset_bottom = -30.0
 text = "Ping: x ms"
 label_settings = SubResource("LabelSettings_pfv5k")
 horizontal_alignment = 2
+
+[node name="Scoreboard" type="HFlowContainer" parent="CanvasLayer"]
+offset_left = 26.0
+offset_top = 26.0
+offset_right = 1888.0
+offset_bottom = 279.0
+script = ExtResource("7_noch3")
+player_score_display_scene = ExtResource("8_2qdsn")
 
 [node name="LocalPlayer" parent="." node_paths=PackedStringArray("moveInput", "shootInput") instance=ExtResource("4_gjcdf")]
 position = Vector2(966, 465)

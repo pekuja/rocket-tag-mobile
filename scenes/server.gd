@@ -35,18 +35,18 @@ func _process(delta) -> void:
 					player_character.velocity = Vector2(0.0, 0.0)
 		
 		sync_player_state.rpc(
-			playerId, player_character.health,
+			playerId, player_character.health, player_character.score,
 			player_character.global_position, player_character.velocity,
 			hookState, hookPosition, hookVelocity)
 
 func _on_projectile_impact(projectile):
 	print("Projectile impact")
-	sync_create_explosion.rpc(projectile.global_position)
+	sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
 	sync_remove_projectile.rpc(projectile.player.id, projectile.id)
 	
 func _on_projectile_expired(projectile):
 	print("Projectile expired")
-	sync_create_explosion.rpc(projectile.global_position)
+	sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
 	
 @rpc("any_peer", "call_local")
 func sync_projectile_shot(projectile_id, position, direction, speed):

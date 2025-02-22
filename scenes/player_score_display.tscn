@@ -1,0 +1,23 @@
+[gd_scene load_steps=8 format=3 uid="uid://cvs8eeiltwlsk"]
+
+[ext_resource type="Script" path="res://scenes/player_score_display.gd" id="1_04rwg"]
+[ext_resource type="Texture2D" uid="uid://3o7udemvhxig" path="res://assets/player_character_portrait_blue.tres" id="2_ws5yq"]
+[ext_resource type="Texture2D" uid="uid://bcfnkmjv8bn6k" path="res://assets/player_character_portrait_green.tres" id="3_tj8ti"]
+[ext_resource type="Texture2D" uid="uid://dn7h6bnt128gf" path="res://assets/player_character_portrait_red.tres" id="4_g5s08"]
+[ext_resource type="Texture2D" uid="uid://b0ajqk1mlk28b" path="res://assets/player_character_portrait_tan.tres" id="5_j6sbf"]
+[ext_resource type="Texture2D" uid="uid://dhr6eox3i4vb3" path="res://assets/player_character_portrait_yellow.tres" id="6_hu431"]
+[ext_resource type="Theme" uid="uid://nhqrcqxgcjis" path="res://ui_theme.tres" id="7_c6sum"]
+
+[node name="Player Score Display" type="HFlowContainer"]
+custom_minimum_size = Vector2(256, 0)
+script = ExtResource("1_04rwg")
+player_portrait_images = Array[Texture2D]([ExtResource("2_ws5yq"), ExtResource("3_tj8ti"), ExtResource("4_g5s08"), ExtResource("5_j6sbf"), ExtResource("6_hu431")])
+
+[node name="Player Portrait" type="TextureRect" parent="."]
+layout_mode = 2
+theme = ExtResource("7_c6sum")
+
+[node name="Player Score" type="Label" parent="."]
+layout_mode = 2
+theme = ExtResource("7_c6sum")
+text = "12"

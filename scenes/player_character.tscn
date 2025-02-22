@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://d0oq563agkkkg"]
+[gd_scene load_steps=10 format=3 uid="uid://d0oq563agkkkg"]
 
 [ext_resource type="Script" path="res://scenes/player_character.gd" id="1_4l8mv"]
 [ext_resource type="SpriteFrames" uid="uid://ddc61n0xsdtq2" path="res://assets/player_character_spriteframes_green.tres" id="2_mv6ns"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://b1vya7ds3rghn" path="res://assets/gun07.png" id="4_k62k7"]
 [ext_resource type="SpriteFrames" uid="uid://45yey6qwm2qx" path="res://assets/player_character_spriteframes_blue.tres" id="4_ntcwh"]
 [ext_resource type="SpriteFrames" uid="uid://bk7ikkqgskofm" path="res://assets/player_character_spriteframes_tan.tres" id="5_q7mb7"]
+[ext_resource type="SpriteFrames" uid="uid://cmug0rch7ik55" path="res://assets/player_character_spriteframes_yellow.tres" id="6_2nckj"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_apsu0"]
 radius = 53.0
@@ -14,7 +15,7 @@ height = 144.0
 
 [node name="Player Character" type="CharacterBody2D"]
 script = ExtResource("1_4l8mv")
-sprite_frame_options = Array[SpriteFrames]([ExtResource("2_xwwyn"), ExtResource("2_mv6ns"), ExtResource("4_ntcwh"), ExtResource("2_mv6ns"), ExtResource("5_q7mb7")])
+sprite_frame_options = Array[SpriteFrames]([ExtResource("4_ntcwh"), ExtResource("2_mv6ns"), ExtResource("2_xwwyn"), ExtResource("5_q7mb7"), ExtResource("6_2nckj")])
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 visible = false

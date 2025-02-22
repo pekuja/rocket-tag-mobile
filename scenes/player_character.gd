@@ -8,12 +8,18 @@ class_name PlayerCharacter
 @onready var _healthbar = $HealthBar
 @onready var _collision_shape = $CollisionShape2D
 
+signal player_died(victim: PlayerCharacter, killer : PlayerCharacter)
+
 var hook : Node2D
 var projectiles = {}
 var id = -1
 
 var health = 100
 var respawn_timer = 0.0
+
+var score = 0
+
+var sprite_frame_index = 0
 
 const SPEED = 300.0
 const ACCELERATE = 1200.0
@@ -26,11 +32,13 @@ const TERMINAL_VELOCITY = 1200.0
 var gravity: int = ProjectSettings.get("physics/2d/default_gravity")
 
 func update_sprite():
-	var sprite_frame_index = 0
+	sprite_frame_index = 0
 	if sprite_frame_options.size() > 0 and id >= 0:
 		sprite_frame_index = id % sprite_frame_options.size()
 	else:
 		print("id: ", id, " and number of sprite frames", sprite_frame_options.size())
+	
+	print("Updating sprite for player id %s with color index %s" % [id, sprite_frame_index])
 	
 	_animation_player.sprite_frames = sprite_frame_options[sprite_frame_index]
 	
@@ -79,8 +87,8 @@ func _process(_delta: float) -> void:
 		else:
 			_animation_player.play("stand")
 		
-func explosion_hit(pos : Vector2):
-	if is_multiplayer_authority():
+func explosion_hit(explosion_owner : PlayerCharacter, pos : Vector2):
+	if is_multiplayer_authority() and health > 0:
 		var diff = global_position - pos
 		
 		var force_magnitude = 100000.0 / diff.length()
@@ -92,6 +100,9 @@ func explosion_hit(pos : Vector2):
 		health = clamp(health - damage, 0, 100)
 		
 		update_healthbar()
+		
+		if health == 0:
+			player_died.emit(self, explosion_owner)
 		
 func update_healthbar():
 	_healthbar.points[1].x = health

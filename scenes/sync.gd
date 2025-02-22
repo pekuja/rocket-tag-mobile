@@ -22,12 +22,12 @@ func get_random_spawn_point() -> Vector2i:
 	
 	return Vector2i(0,0)
 	
-func _on_player_connected(id):
+func _on_player_connected(id : int):
 	print("Player ", id, " connected")
 	if id == 1: # no player character for server
 		return
 	
-	var instance = remote_player_scene.instantiate()
+	var instance : PlayerCharacter = remote_player_scene.instantiate()
 	add_child(instance)
 	
 	print("Creating remote player instance for id ", id)
@@ -37,20 +37,27 @@ func _on_player_connected(id):
 	
 	if is_multiplayer_authority():
 		instance.global_position = get_random_spawn_point()
+		instance.player_died.connect(_on_player_died)
 	
-func _on_player_disconnected(id):
+func _on_player_disconnected(id : int):
 	print("Player ", id, " disconnected")
 	
 	detach_hook(id)
 	
 	remove_child(players[id])
 	players.erase(id)
+	
+func _on_player_died(victim, killer):
+	if victim == killer:
+		killer.score -= 1
+	else:
+		killer.score += 1
 
-func get_player_character(id):
+func get_player_character(id : int):
 	return players[id]
 	
 @rpc("authority", "call_remote")
-func sync_player_state(id, health : int, position : Vector2i, velocity : Vector2,
+func sync_player_state(id : int, health : int, score : int, position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	pass # This function is Here for the RPC signature
 	
@@ -73,7 +80,7 @@ func sync_projectile_shot(projectile_id, position, direction, speed):
 	create_projectile(projectile_id, position, direction, speed)
 
 @rpc("authority", "call_local")
-func sync_remove_projectile(player_id, projectile_id):
+func sync_remove_projectile(player_id : int, projectile_id : int):
 	var player = get_player_character(player_id)
 	if player.projectiles.has(projectile_id):
 		var projectile = player.projectiles[projectile_id]
@@ -81,14 +88,15 @@ func sync_remove_projectile(player_id, projectile_id):
 		player.projectiles.erase(projectile_id)
 		
 @rpc("authority", "call_local")
-func sync_create_explosion(position):
+func sync_create_explosion(player_id : int, position):
 	print("Create explosion")
-	var explosion = explosion_scene.instantiate()
+	var explosion : Explosion = explosion_scene.instantiate()
 	explosion.global_position = position
+	explosion.player = get_player_character(player_id)
 	
 	add_child(explosion)
 
-func create_hook(id):
+func create_hook(id : int):
 	var player = get_player_character(id)
 	var hook = GrapplingHook.get_hook(player)
 	if hook:
@@ -102,7 +110,7 @@ func create_hook(id):
 	
 	return hook
 	
-func detach_hook(id):
+func detach_hook(id : int):
 	var player = get_player_character(id)
 	GrapplingHook.detach_hook(player)
 

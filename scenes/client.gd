@@ -5,6 +5,7 @@ class_name ClientNode
 @onready var camera = $Camera2D
 @onready var local_player = $LocalPlayer
 @onready var ping_label = $CanvasLayer/Ping
+@onready var scoreboard = $CanvasLayer/Scoreboard
 
 const PING_INTERVAL_US = 100000
 const PING_RESULTS_TO_AVERAGE = 10
@@ -37,11 +38,21 @@ func _ready() -> void:
 func _process(_delta) -> void:
 	if not _waiting_for_ping and Time.get_ticks_usec() - _ping_send_time >= PING_INTERVAL_US:
 		send_ping_to_server()
+		
+func _on_player_connected(id : int):
+	super(id)
+	# + 1 for local player
+	scoreboard.set_num_of_players(players.size() + 1)
+	
+func _on_player_disconnected(id : int):
+	super(id)
+	# + 1 for local player
+	scoreboard.set_num_of_players(players.size() + 1)
 
 func is_multiplayer():
 	return _peer.get_connection_status() == ENetMultiplayerPeer.CONNECTION_CONNECTED
 
-func get_player_character(id):
+func get_player_character(id : int):
 	if id == multiplayer.get_unique_id():
 		return local_player.character
 	else:
@@ -88,9 +99,20 @@ func _on_grapplinghook_shot(position, direction, speed):
 func _on_grapplinghook_detach():
 	if is_multiplayer():
 		sync_grapplinghook_detach.rpc()
+		
+func get_player_index(player_id : int):
+	if player_id == multiplayer.get_unique_id():
+		return 0
+	var index = 1
+	for id in players.keys():
+		if id == player_id:
+			return index
+		index += 1
+		
+	return -1
 
 @rpc("authority", "call_remote")
-func sync_player_state(id, health : int,
+func sync_player_state(id : int, health : int, score : int, 
 		position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	var player = get_player_character(id)
@@ -100,6 +122,8 @@ func sync_player_state(id, health : int,
 		player.velocity = velocity
 		player.health = health
 		player.update_healthbar()
+		player.score = score
+		scoreboard.update_score_display(get_player_index(id), player.sprite_frame_index, score)
 		
 	if hookState == GrapplingHook.State.Inactive:
 		detach_hook(id)
@@ -131,6 +155,6 @@ func pong(game_time : int):
 	if _game_time_offsets.size() > PING_RESULTS_TO_AVERAGE:
 		_game_time_offsets.pop_front()
 	var diff = get_average_game_time_offset() - old_average
-	print("Adjusted time offset by %s ms" % (diff / 1000.0))
+	#print("Adjusted time offset by %s ms" % (diff / 1000.0))
 	
 	ping_label.text = "Ping: %s ms " % (average_latency / 1000.0)
