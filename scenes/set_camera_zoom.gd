@@ -1,4 +1,5 @@
 extends Camera2D
+class_name GameCamera
 
 @export var local_player : LocalPlayer
 @export var tileMap : TileMapLayer

@@ -2,10 +2,13 @@ extends Sync
 
 class_name ClientNode
 
-@onready var camera = $Camera2D
+@onready var camera : GameCamera = $Camera2D
 @onready var local_player : LocalPlayer = $LocalPlayer
 @onready var ping_label = $CanvasLayer/Ping
 @onready var scoreboard = $CanvasLayer/Scoreboard
+@onready var canvas_layer = $CanvasLayer
+@onready var joystick_left = $"CanvasLayer/Touch Joystick (Movement)"
+@onready var joystick_right = $"CanvasLayer/Touch Joystick (Shooting)"
 
 const PING_INTERVAL_US = 100000
 const PING_RESULTS_TO_AVERAGE = 10
@@ -28,18 +31,26 @@ func _ready() -> void:
 		_peer.create_server(PORT, MAX_CONNECTIONS)
 		multiplayer.multiplayer_peer = _peer
 		
-		var id = multiplayer.get_unique_id()
-		
-		players[id] = local_player.character
-		local_player.character.id = id
-		local_player.character.update_sprite()
-		local_player.character.global_position = get_random_spawn_point()
-		local_player.character.player_died.connect(_on_player_died)
-		
-		player_ids.append(id)
-		
-		scoreboard.set_num_of_players(1)
-		scoreboard.update_score_display(0, local_player.character.sprite_frame_index, 0)
+		if OS.has_feature("server"):
+			# Dedicated server. Get rid of local player and some UI.
+			remove_child(local_player)
+			canvas_layer.remove_child(ping_label)
+			canvas_layer.remove_child(joystick_left)
+			canvas_layer.remove_child(joystick_right)
+			camera.spectatorCamera = true
+		else:
+			var id = multiplayer.get_unique_id()
+			
+			players[id] = local_player.character
+			local_player.character.id = id
+			local_player.character.update_sprite()
+			local_player.character.global_position = get_random_spawn_point()
+			local_player.character.player_died.connect(_on_player_died)
+			
+			player_ids.append(id)
+			
+			scoreboard.set_num_of_players(1)
+			scoreboard.update_score_display(0, local_player.character.sprite_frame_index, 0)
 	else:
 		print("Connecting to server at ", server_address)
 		
@@ -49,11 +60,12 @@ func _ready() -> void:
 		multiplayer.connected_to_server.connect(_on_connected_to_server)
 		multiplayer.connection_failed.connect(_on_connection_failed)
 	
-	local_player.projectile_shot.connect(_on_projectile_shot)
-	local_player.grapplinghook_shot.connect(_on_grapplinghook_shot)
-	local_player.grapplinghook_detach.connect(_on_grapplinghook_detach)
+	if not OS.has_feature("server"):
+		local_player.projectile_shot.connect(_on_projectile_shot)
+		local_player.grapplinghook_shot.connect(_on_grapplinghook_shot)
+		local_player.grapplinghook_detach.connect(_on_grapplinghook_detach)
 			
-	camera.local_player = local_player
+		camera.local_player = local_player
 	
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)

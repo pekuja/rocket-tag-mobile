@@ -1,6 +1,5 @@
 extends Control
 
-@export var server_scene : PackedScene
 @export var client_scene : PackedScene
 
 @onready var _serverAddressLineEdit = $HFlowContainer/VFlowContainer/ServerAddress
@@ -33,7 +32,6 @@ func _on_join_game_pressed() -> void:
 	hide()
 
 func _on_host_game_pressed() -> void:
-	#var scene = server_scene.instantiate()
 	var scene : ClientNode = client_scene.instantiate()
 	scene.is_host = true
 	scene.name = "Sync"
