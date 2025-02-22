@@ -5,10 +5,11 @@ func _ready() -> void:
 	if OS.has_feature("server"):
 		var scene = ResourceLoader.load("res://scenes/Server.tscn")
 		var server_scene = scene.instantiate()
-		add_child(server_scene)
+		var root = get_tree().get_root()
+		root.add_child.call_deferred(server_scene)
 		server_scene.name = "Sync"
 	else:
-		var scene = ResourceLoader.load("res://scenes/Client.tscn")
+		var scene = ResourceLoader.load("res://scenes/main_menu.tscn")
 		var client_scene = scene.instantiate()
-		add_child(client_scene)
-		client_scene.name = "Sync"
+		var root = get_tree().get_root()
+		root.add_child.call_deferred(client_scene)

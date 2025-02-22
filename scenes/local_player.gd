@@ -10,7 +10,7 @@ const PROJECTILE_LIFETIME = 1.0
 
 @export var grapplingHookSpeed = 400.0
 
-@onready var character = $Character
+@onready var character : PlayerCharacter = $Character
 @onready var _projectile_spawn_point = $Character/GunSprite/ProjectileSpawnPoint
 @onready var _sprite_gun = $Character/GunSprite
 @onready var _arrow = $Character/Arrow

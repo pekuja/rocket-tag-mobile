@@ -39,10 +39,7 @@ func _on_player_disconnected(id : int):
 		player_ids.erase(id)
 	
 func _on_player_died(victim, killer):
-	if victim == killer:
-		killer.score -= 1
-	else:
-		killer.score += 1
+	pass
 
 func get_player_character(id : int):
 	if players.has(id):
@@ -97,7 +94,7 @@ func create_projectile(projectile_id, position, direction, speed):
 	return projectile
 	
 @rpc("any_peer", "call_local")
-func sync_projectile_shot(projectile_id, position, direction, speed):		
+func sync_projectile_shot(projectile_id, position, direction, speed):
 	create_projectile(projectile_id, position, direction, speed)
 
 @rpc("authority", "call_local")
@@ -152,7 +149,7 @@ func sync_grapplinghook_shot(position : Vector2i, direction : Vector2, speed : f
 	hook.global_position = position
 	hook.velocity = direction * speed
 
-@rpc("any_peer", "call_remote")
+@rpc("any_peer", "call_local")
 func sync_grapplinghook_detach():
 	var id = multiplayer.get_remote_sender_id()
 	detach_hook(id)

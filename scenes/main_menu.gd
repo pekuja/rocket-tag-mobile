@@ -33,7 +33,9 @@ func _on_join_game_pressed() -> void:
 	hide()
 
 func _on_host_game_pressed() -> void:
-	var scene = server_scene.instantiate()
+	#var scene = server_scene.instantiate()
+	var scene : ClientNode = client_scene.instantiate()
+	scene.is_host = true
 	scene.name = "Sync"
 	var root = get_tree().get_root()
 	root.add_child(scene)
