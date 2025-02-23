@@ -12,6 +12,7 @@ class_name PlayerCharacter
 signal player_died(victim: PlayerCharacter, killer : PlayerCharacter)
 
 var hook : Node2D
+var last_hook_state : GrapplingHook.State = GrapplingHook.State.Inactive
 var projectiles = {}
 var id = -1
 

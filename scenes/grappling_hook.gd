@@ -73,7 +73,8 @@ func _physics_process(delta: float) -> void:
 			
 			if state == State.Reeling:
 				if length < REELING_SPEED * delta:
-					hook_detached.emit()	
+					detach_hook(player)
+					hook_detached.emit()
 					return
 			elif length > MAXIMUM_LENGTH:
 				state = State.Reeling

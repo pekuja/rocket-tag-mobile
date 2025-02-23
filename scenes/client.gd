@@ -50,6 +50,7 @@ func _ready() -> void:
 			local_player.character.update_sprite()
 			local_player.character.global_position = get_random_spawn_point()
 			local_player.character.player_died.connect(_on_player_died)
+			local_player.character.health = 100
 			
 			player_ids.append(id)
 			
@@ -89,10 +90,16 @@ func _process(delta) -> void:
 			var hookState : GrapplingHook.State = GrapplingHook.State.Inactive
 			var hookPosition = Vector2(0,0)
 			var hookVelocity = Vector2(0,0)
+			
 			if player_character.hook:
 				hookState = player_character.hook.state
 				hookPosition = player_character.hook.position
 				hookVelocity = player_character.hook.velocity
+			
+			var hook_update_needed = false
+			if player_character.last_hook_state != hookState:
+				player_character.last_hook_state = hookState
+				hook_update_needed = true
 			
 			var health_update_needed = false
 			if player_character.health == 0:
@@ -109,7 +116,7 @@ func _process(delta) -> void:
 						player_character.global_position = get_random_spawn_point()
 						player_character.velocity = Vector2(0.0, 0.0)
 			
-			if send_state_sync or health_update_needed:
+			if send_state_sync or health_update_needed or hook_update_needed:
 				sync_player_state.rpc(
 					game_time, playerId, player_character.health, player_character.score,
 					player_character.global_position, player_character.velocity,
@@ -244,7 +251,7 @@ func sync_player_state(game_time : int, id : int, health : int, score : int,
 		if hookState == GrapplingHook.State.Inactive:
 			detach_hook(id)
 		else:
-			var hook = create_hook(id)
+			var hook : GrapplingHook = create_hook(id)
 			hook.global_position = hookPosition
 			hook.velocity = hookVelocity
 			hook.state = hookState

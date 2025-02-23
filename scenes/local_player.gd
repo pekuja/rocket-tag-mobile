@@ -49,6 +49,9 @@ func _get_hook_target_pos():
 		return result.position
 	else:
 		return end_pos
+		
+func _ready() -> void:
+	character.health = 0
 	
 func _process(_delta: float) -> void:	
 	if not character.is_alive():
@@ -61,7 +64,7 @@ func _process(_delta: float) -> void:
 			
 			projectile_shot.emit(_get_projectile_target_pos())
 			
-	if moveInput.is_just_released:		
+	if moveInput.is_just_released:
 		var direction = moveInput.joystick_position
 		if direction.length() > HOOK_THRESHOLD:
 			var target_pos = _get_hook_target_pos()
