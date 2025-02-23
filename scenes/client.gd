@@ -142,6 +142,7 @@ func get_game_time_sec():
 
 func send_ping_to_server():
 	if is_multiplayer():
+		_waiting_for_ping = true
 		_ping_send_time = Time.get_ticks_usec()
 		ping.rpc_id(1)
 	
@@ -276,6 +277,8 @@ func ping():
 
 @rpc("any_peer", "call_remote", "reliable")
 func pong(game_time : int):
+	_waiting_for_ping = false
+	
 	var current_time = Time.get_ticks_usec()
 	var elapsed_time = current_time - _ping_send_time
 	
