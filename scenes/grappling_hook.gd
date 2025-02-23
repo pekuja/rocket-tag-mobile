@@ -20,6 +20,8 @@ const MAXIMUM_LENGTH = 3000
 const FLYING_SPEED = 3200
 const REELING_SPEED = 6400
 
+const COLLISION_MASK = 1
+
 func init(player):
 	self.player = player
 	player.hook = self
@@ -57,7 +59,7 @@ func _physics_process(delta: float) -> void:
 		
 		var space_state = get_world_2d().direct_space_state
 		var query = PhysicsRayQueryParameters2D.create(self.global_position, new_position)
-		query.exclude = [player]
+		query.collision_mask = COLLISION_MASK
 		var result = space_state.intersect_ray(query)
 		
 		if result:

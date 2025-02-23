@@ -42,7 +42,7 @@ func _get_hook_target_pos():
 	var end_pos = character.global_position + moveInput.joystick_position.normalized() * hook_range
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsRayQueryParameters2D.create(character.global_position, end_pos)
-	query.exclude = [character]
+	query.collision_mask = GrapplingHook.COLLISION_MASK
 	var result = space_state.intersect_ray(query)
 	
 	if result:
