@@ -42,6 +42,9 @@ static func detach_hook(player):
 func _ready() -> void:
 	hook_sprite.rotation = Vector2(0, -1).angle_to(self.velocity)
 	
+	self.global_position = player.global_position + self.velocity / Engine.physics_ticks_per_second
+	rope.points[1] = player.global_position - self.global_position
+	
 func _physics_process(delta: float) -> void:
 	var new_position = self.global_position
 	
