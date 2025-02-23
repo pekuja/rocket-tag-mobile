@@ -66,6 +66,7 @@ func _process(_delta):
 			self.zoom = new_zoom * _scale * Vector2(1.0, 1.0)
 	elif local_player:
 		self.global_position = local_player.character.global_position
+		self.zoom = _scale * Vector2(1.0, 1.0)
 	
 	var topLeft = _mapBounds.position + _unzoomedViewportSize / 2
 	var bottomRight = _mapBounds.end - _unzoomedViewportSize / 2
