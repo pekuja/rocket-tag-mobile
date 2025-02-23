@@ -11,7 +11,7 @@
 [node name="Player Score Display" type="HFlowContainer"]
 custom_minimum_size = Vector2(256, 0)
 script = ExtResource("1_04rwg")
-player_portrait_images = Array[Texture2D]([ExtResource("2_ws5yq"), ExtResource("3_tj8ti"), ExtResource("4_g5s08"), ExtResource("5_j6sbf"), ExtResource("6_hu431")])
+player_portrait_images = Array[AtlasTexture]([ExtResource("2_ws5yq"), ExtResource("3_tj8ti"), ExtResource("4_g5s08"), ExtResource("5_j6sbf"), ExtResource("6_hu431")])
 
 [node name="Player Portrait" type="TextureRect" parent="."]
 layout_mode = 2

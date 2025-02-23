@@ -173,7 +173,7 @@ func _on_connection_failed():
 
 func _on_projectile_shot(target_position):
 	if is_multiplayer():
-		sync_projectile_shot.rpc(_next_projectile_id, target_position)
+		sync_projectile_shot.rpc_id(1, _next_projectile_id, target_position)
 		_next_projectile_id += 1
 		
 
@@ -205,6 +205,20 @@ func _on_player_died(victim, killer):
 		
 func get_player_index(player_id : int):
 	return player_ids.find(player_id)
+	
+func network_latency_catchup(node : Node, game_time : int):
+	# Account for network latency
+	var local_game_time = get_game_time()
+	var total_delta = local_game_time - game_time
+	if total_delta > 0:
+		var single_delta = 1000000 / Engine.physics_ticks_per_second
+		var delta_sec = single_delta / 1000000.0
+		var frames = total_delta / single_delta
+		if frames > 0:
+			print("Catching up ", node, " simulation for ", frames, " frames")
+			while frames > 0:
+				frames -= 1
+				node._physics_process(delta_sec)
 
 @rpc("authority", "call_remote", "unreliable_ordered")
 func sync_player_state(game_time : int, id : int, health : int, score : int, 
@@ -229,22 +243,10 @@ func sync_player_state(game_time : int, id : int, health : int, score : int,
 			hook.velocity = hookVelocity
 			hook.state = hookState
 		
-		# Account for network latency
-		var local_game_time = get_game_time()
-		var total_delta = local_game_time - game_time
-		if total_delta > 0:
-			var single_delta = 1000000 / Engine.physics_ticks_per_second
-			var delta_sec = single_delta / 1000000.0
-			var frames = total_delta / single_delta
-			if frames > 0:
-				print("Catching up player simulation for ", frames, " frames")
-				while frames > 0:
-					frames -= 1
-					player._physics_process(delta_sec)
-					
-					var hook = GrapplingHook.get_hook(player)
-					if hook:
-						hook._physics_process(delta_sec)
+		network_latency_catchup(player, game_time)
+		var hook = GrapplingHook.get_hook(player)
+		if hook:
+			network_latency_catchup(hook, game_time)
 
 @rpc("any_peer", "call_remote", "reliable")
 func player_join_game():
@@ -259,16 +261,48 @@ func player_join_game():
 		var player = get_player_character(id)
 		scoreboard.update_score_display(get_player_index(id), player.sprite_frame_index, 0)
 
+func create_projectile(player, projectile_id, target_position):
+	var projectile : Projectile = projectile_scene.instantiate()
+	projectile.init_with_target(player, projectile_id, target_position)
+	
+	add_child(projectile)
+	
+	return projectile
+
 @rpc("any_peer", "call_local", "reliable")
 func sync_projectile_shot(projectile_id, target_position):
 	if is_multiplayer_authority():
-		var projectile = create_projectile(projectile_id, target_position)
+		var player_id = multiplayer.get_remote_sender_id()
+		var player = get_player_character(player_id)
 		
-		if projectile:
-			projectile.projectile_impact.connect(_on_projectile_impact)
-			projectile.projectile_expired.connect(_on_projectile_expired)
+		if not player.is_alive():
+			return
+		
+		print("Creating projectile for player ", player_id)
+		var projectile = create_projectile(player, projectile_id, target_position)
+		
+		projectile.projectile_impact.connect(_on_projectile_impact)
+		projectile.projectile_expired.connect(_on_projectile_expired)
+		
+		var game_time = Time.get_ticks_usec()
+		sync_projectile_state.rpc(game_time, player_id, projectile_id, projectile.global_position, projectile.velocity)
+
+@rpc("authority", "call_remote", "reliable")
+func sync_projectile_state(game_time, player_id, projectile_id, position, velocity):
+	var player = get_player_character(player_id)
+	
+	var projectile : Projectile
+	if player.projectiles.has(projectile_id):
+		projectile = player.projectiles[projectile_id]
 	else:
-		create_projectile(projectile_id, target_position)
+		projectile = projectile_scene.instantiate()	
+		projectile.init(player, projectile_id, position, velocity)
+		add_child(projectile)
+	
+	projectile.global_position = position
+	projectile.velocity = velocity
+	
+	network_latency_catchup(projectile, game_time)
 
 @rpc("any_peer", "call_remote", "reliable")
 func ping():

@@ -16,13 +16,23 @@ var _time_created = 0
 const PROJECTILE_SPEED = 1600.0
 const PROJECTILE_LIFETIME = 1.0
 
-func init(player : PlayerCharacter, id, target_position):
+func init_with_target(player : PlayerCharacter, id, target_position):
+	var position = player.projectile_spawn_point.global_position
+	var direction = (target_position - position).normalized()
+	var velocity = direction * PROJECTILE_SPEED
+	
+	print("projectile init_with_target, target: ", target_position, ", velocity: ", velocity)
+	
+	init(player, id, position, velocity)
+	
+func init(player : PlayerCharacter, id, position, velocity):
 	self.player = player
 	self.id = id
-	self.global_position = player.projectile_spawn_point.global_position
-	var direction = (target_position - self.global_position).normalized()
-	self.velocity = direction * PROJECTILE_SPEED
+	self.global_position = position
+	self.velocity = velocity
 	self.lifetime = PROJECTILE_LIFETIME
+	
+	print("projectile init, position: ", position, ", velocity: ", velocity)
 	
 	player.projectiles[id] = self
 

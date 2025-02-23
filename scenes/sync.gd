@@ -79,24 +79,6 @@ func sync_player_state(game_time : int, id : int, health : int, score : int,
 		position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
 	pass # This function is Here for the RPC signature
-	
-func create_projectile(projectile_id, target_position):
-	var id = multiplayer.get_remote_sender_id()
-	var player = get_player_character(id)
-	
-	if not player.is_alive():
-		return null
-	
-	var projectile : Projectile = projectile_scene.instantiate()
-	projectile.init(player, projectile_id, target_position)
-	
-	add_child(projectile)
-	
-	return projectile
-	
-@rpc("any_peer", "call_local", "reliable")
-func sync_projectile_shot(projectile_id, target_position):
-	create_projectile(projectile_id, target_position)
 
 @rpc("authority", "call_local", "reliable")
 func sync_remove_projectile(player_id : int, projectile_id : int):
