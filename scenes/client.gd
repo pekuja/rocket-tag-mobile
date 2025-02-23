@@ -228,11 +228,13 @@ func network_latency_catchup(node : Node, game_time : int):
 func sync_player_state(game_time : int, id : int, health : int, score : int, 
 		position : Vector2i, velocity : Vector2,
 		hookState : GrapplingHook.State, hookPosition : Vector2i, hookVelocity : Vector2):
-	var player = get_player_character(id)
+	var player : PlayerCharacter = get_player_character(id)
 	
 	if player:
 		player.global_position = position
 		player.velocity = velocity
+		if health < player.health:
+			player.on_damage_taken()
 		player.health = health
 		player.update_healthbar()
 		player.score = score

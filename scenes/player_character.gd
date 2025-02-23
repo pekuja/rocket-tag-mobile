@@ -97,14 +97,21 @@ func explosion_hit(explosion_owner : PlayerCharacter, pos : Vector2):
 		velocity += force_magnitude * force_direction
 			
 		var damage = round(5000 / diff.length())
-		health = clamp(health - damage, 0, 100)
+		if damage > 0:
+			health = clamp(health - damage, 0, 100)
 		
-		update_healthbar()
-		
-		if health == 0:
-			player_died.emit(self, explosion_owner)
+			on_damage_taken()
+			update_healthbar()
+			
+			if health == 0:
+				player_died.emit(self, explosion_owner)
 		
 func update_healthbar():
 	_healthbar.points[1].x = health
+
+func on_damage_taken():
+	_animation_player.modulate = Color.RED
+	var tween = create_tween()
+	tween.tween_property(_animation_player, "modulate", Color.WHITE, 0.5)
 	
 	
