@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dbdtq8xotn1fj"]
 
-[ext_resource type="Script" path="res://scenes/touch_joystick_ui.gd" id="1_flkss"]
+[ext_resource type="Script" path="res://scripts/touch_joystick_ui.gd" id="1_flkss"]
 [ext_resource type="Texture2D" uid="uid://i0jqras5d32c" path="res://assets/shadedLight07.png" id="2_fwh01"]
 [ext_resource type="Texture2D" uid="uid://c5d0mtwy180tw" path="res://assets/shadedLight01.png" id="3_dukd7"]
 

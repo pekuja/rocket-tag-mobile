@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://d0oq563agkkkg"]
 
-[ext_resource type="Script" path="res://scenes/player_character.gd" id="1_4l8mv"]
+[ext_resource type="Script" path="res://scripts/player_character.gd" id="1_4l8mv"]
 [ext_resource type="SpriteFrames" uid="uid://ddc61n0xsdtq2" path="res://assets/player_character_spriteframes_green.tres" id="2_mv6ns"]
 [ext_resource type="SpriteFrames" uid="uid://cdg5gvl2kwrpk" path="res://assets/player_character_spriteframes_red.tres" id="2_xwwyn"]
 [ext_resource type="Texture2D" uid="uid://heyqi27rbw4l" path="res://assets/playerShip1_blue.png" id="3_8um3b"]

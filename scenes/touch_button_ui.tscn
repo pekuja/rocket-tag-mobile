@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://4bqylrgar648"]
 
-[ext_resource type="Script" path="res://scenes/touch_button_ui.gd" id="1_1iuxx"]
+[ext_resource type="Script" path="res://scripts/touch_button_ui.gd" id="1_1iuxx"]
 [ext_resource type="Texture2D" uid="uid://cchkqjpbxidsx" path="res://assets/flatDark47.png" id="1_1tpvt"]
 
 [node name="TouchButtonUi" type="Control"]
