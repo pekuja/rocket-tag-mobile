@@ -7,6 +7,8 @@ class_name GameCamera
 
 const BASE_WIDTH = 3840.0
 const BASE_HEIGHT = 2160.0
+const LERP_AMOUNT = 0.01
+const LOOKAHEAD_TIME = 1.0
 
 var _scale = 1.0
 var _mapBounds : Rect2i
@@ -47,26 +49,32 @@ func _process(_delta):
 		for player : CharacterBody2D in players:
 			if player.is_alive():
 				num_live_players += 1
+				var lookahead_pos = player.global_position + player.velocity * LOOKAHEAD_TIME
 				min_pos.x = min(min_pos.x, player.global_position.x)
+				min_pos.x = min(min_pos.x, lookahead_pos.x)
 				max_pos.x = max(max_pos.x, player.global_position.x)
+				max_pos.x = max(max_pos.x, lookahead_pos.x)
 				min_pos.y = min(min_pos.y, player.global_position.y)
+				min_pos.y = min(min_pos.y, lookahead_pos.y)
 				max_pos.y = max(max_pos.y, player.global_position.y)
+				max_pos.y = max(max_pos.y, lookahead_pos.y)
 					
 		if num_live_players > 0:				
 			min_pos -= BORDER_SIZE
 			max_pos += BORDER_SIZE
 			
-			self.global_position = (min_pos + max_pos) / 2
+			self.global_position = lerp(self.global_position, (min_pos + max_pos) / 2, LERP_AMOUNT)
 			var new_zoom = 1.0
 			if max_pos.x > min_pos.x:
 				new_zoom = minf(new_zoom, BASE_WIDTH / (max_pos.x - min_pos.x))
 			if max_pos.y > min_pos.y:
 				new_zoom = minf(new_zoom, BASE_HEIGHT / (max_pos.y - min_pos.y))
 				
-			self.zoom = new_zoom * _scale * Vector2(1.0, 1.0)
+			self.zoom = lerp(self.zoom, new_zoom * _scale * Vector2(1.0, 1.0), LERP_AMOUNT)
 	elif local_player:
-		self.global_position = local_player.character.global_position
-		self.zoom = _scale * Vector2(1.0, 1.0)
+		var target_position = local_player.character.global_position + local_player.character.velocity * LOOKAHEAD_TIME
+		self.global_position = lerp(self.global_position, target_position, LERP_AMOUNT)
+		self.zoom = lerp(self.zoom, _scale * Vector2(1.0, 1.0), LERP_AMOUNT)
 	
 	var topLeft = _mapBounds.position + _unzoomedViewportSize / 2
 	var bottomRight = _mapBounds.end - _unzoomedViewportSize / 2
