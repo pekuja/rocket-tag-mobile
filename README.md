@@ -11,3 +11,5 @@ For scalability, I made the game itself maintain a consistently-sized view so th
 The network code is using the ENet integration in Godot, and uses remote procedure calls for passing data between peers. Clients essentially send their inputs to the server and other clients, and the server sends back accurate game state information, though the clients do also run the game simulation at the same time. The clients also send ping messages to the server to measure network latency and calibrate their game clocks. Each client maintains their own clock that approximates the server clock. Game state events are sent with timestamps, which are used to catch the client simulation up to where the server is expected to be by the time the event arrives on the client.
 
 All the art assets are CC0 and from [kenney.nl](https://kenney.nl/)
+
+[Gameplay video on Youtube](https://www.youtube.com/watch?v=KOPjpgUhvh4)
