@@ -1,3 +1,4 @@
+![Screenshot of Rocket Tag Mobile](/screenshot.png?raw=true)
 I made this little game prototype to practice mobile game development, networked multiplayer game development, and also to get more comfortable with the Godot game engine.
 
 Players engage in a fight to the death, swinging around using grappling hooks and firing their rocket launchers. The grappling hooks are rubberband-like, slinging the players around at great speeds. This was inspired by an old favorite of mine called Liero.
