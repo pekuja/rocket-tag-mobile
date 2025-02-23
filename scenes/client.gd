@@ -179,12 +179,17 @@ func _on_projectile_shot(target_position):
 
 func _on_projectile_impact(projectile):
 	print("Projectile impact")
-	sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
-	sync_remove_projectile.rpc(projectile.player.id, projectile.id)
+	if is_multiplayer_authority():
+		sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
+		sync_remove_projectile.rpc(projectile.player.id, projectile.id)
+	else:
+		# Just remove the projectile locally
+		sync_remove_projectile(projectile.player.id, projectile.id)
 	
 func _on_projectile_expired(projectile):
 	print("Projectile expired")
-	sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
+	if is_multiplayer_authority():
+		sync_create_explosion.rpc(projectile.player.id, projectile.global_position)
 
 func _on_grapplinghook_shot(target_pos):
 	if is_multiplayer():
@@ -298,6 +303,9 @@ func sync_projectile_state(game_time, player_id, projectile_id, position, veloci
 		projectile = projectile_scene.instantiate()	
 		projectile.init(player, projectile_id, position, velocity)
 		add_child(projectile)
+		
+		projectile.projectile_impact.connect(_on_projectile_impact)
+		projectile.projectile_expired.connect(_on_projectile_expired)
 	
 	projectile.global_position = position
 	projectile.velocity = velocity
