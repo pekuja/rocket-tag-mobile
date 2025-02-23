@@ -173,7 +173,7 @@ func _on_connection_failed():
 
 func _on_projectile_shot(target_position):
 	if is_multiplayer():
-		sync_projectile_shot.rpc_id(1, _next_projectile_id, target_position)
+		sync_projectile_shot.rpc(_next_projectile_id, target_position)
 		_next_projectile_id += 1
 		
 
@@ -220,7 +220,6 @@ func network_latency_catchup(node : Node, game_time : int):
 		var delta_sec = single_delta / 1000000.0
 		var frames = total_delta / single_delta
 		if frames > 0:
-			print("Catching up ", node, " simulation for ", frames, " frames")
 			while frames > 0:
 				frames -= 1
 				node._physics_process(delta_sec)
@@ -275,20 +274,22 @@ func create_projectile(player, projectile_id, target_position):
 	return projectile
 
 @rpc("any_peer", "call_local", "reliable")
-func sync_projectile_shot(projectile_id, target_position):
+func sync_projectile_shot(projectile_id, target_position):	
+	var player_id = multiplayer.get_remote_sender_id()
+	var player = get_player_character(player_id)
+	
+	if not player.is_alive():
+		return
+	
+	if player_id == multiplayer.get_unique_id() and not is_multiplayer_authority():
+		await get_tree().create_timer(get_average_network_latency_sec()).timeout
+	
+	var projectile = create_projectile(player, projectile_id, target_position)
+	
+	projectile.projectile_impact.connect(_on_projectile_impact)
+	projectile.projectile_expired.connect(_on_projectile_expired)
+		
 	if is_multiplayer_authority():
-		var player_id = multiplayer.get_remote_sender_id()
-		var player = get_player_character(player_id)
-		
-		if not player.is_alive():
-			return
-		
-		print("Creating projectile for player ", player_id)
-		var projectile = create_projectile(player, projectile_id, target_position)
-		
-		projectile.projectile_impact.connect(_on_projectile_impact)
-		projectile.projectile_expired.connect(_on_projectile_expired)
-		
 		var game_time = Time.get_ticks_usec()
 		sync_projectile_state.rpc(game_time, player_id, projectile_id, projectile.global_position, projectile.velocity)
 
@@ -312,10 +313,42 @@ func sync_projectile_state(game_time, player_id, projectile_id, position, veloci
 	
 	network_latency_catchup(projectile, game_time)
 
+@rpc("any_peer", "call_local", "reliable")
+func sync_grapplinghook_shot(target_pos : Vector2i):
+	var id = multiplayer.get_remote_sender_id()
+	var player = get_player_character(id)
+	
+	if not player.is_alive():
+		return
+		
+	if id == multiplayer.get_unique_id() and not is_multiplayer_authority():
+		await get_tree().create_timer(get_average_network_latency_sec()).timeout
+	
+	var hook = create_hook(id)
+	
+	hook.state = GrapplingHook.State.Flying
+	
+	hook.global_position = player.global_position
+	var direction : Vector2 = (Vector2(target_pos) - player.global_position).normalized()
+	hook.velocity = direction * GrapplingHook.FLYING_SPEED
+
 @rpc("any_peer", "call_remote", "reliable")
 func ping():
 	var id = multiplayer.get_remote_sender_id()
 	pong.rpc_id(id, Time.get_ticks_usec())
+
+func get_average_network_latency():
+	var average_latency = 0
+	for latency in _ping_results:
+		average_latency += latency
+	
+	if not _ping_results.is_empty():
+		average_latency /= _ping_results.size()
+	
+	return average_latency
+	
+func get_average_network_latency_sec():
+	return get_average_network_latency() / 1000000.0
 
 @rpc("any_peer", "call_remote", "reliable")
 func pong(game_time : int):
@@ -329,10 +362,7 @@ func pong(game_time : int):
 	if _ping_results.size() > PING_RESULTS_TO_AVERAGE:
 		_ping_results.pop_front()
 	
-	var average_latency = 0
-	for latency in _ping_results:
-		average_latency += latency
-	average_latency /= _ping_results.size()
+	var average_latency = get_average_network_latency()
 	
 	var new_time = game_time + elapsed_time / 2
 	var new_offset = new_time - current_time

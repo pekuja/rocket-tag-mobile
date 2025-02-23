@@ -117,22 +117,6 @@ func detach_hook(id : int):
 		GrapplingHook.detach_hook(player)
 
 @rpc("any_peer", "call_local", "reliable")
-func sync_grapplinghook_shot(target_pos : Vector2i):
-	var id = multiplayer.get_remote_sender_id()
-	var player = get_player_character(id)
-	
-	if not player.is_alive():
-		return
-	
-	var hook = create_hook(id)
-	
-	hook.state = GrapplingHook.State.Flying
-	
-	hook.global_position = player.global_position
-	var direction : Vector2 = (Vector2(target_pos) - player.global_position).normalized()
-	hook.velocity = direction * GrapplingHook.FLYING_SPEED
-
-@rpc("any_peer", "call_local", "reliable")
 func sync_grapplinghook_detach():
 	var id = multiplayer.get_remote_sender_id()
 	detach_hook(id)
