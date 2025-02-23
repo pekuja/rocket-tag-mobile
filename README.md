@@ -2,7 +2,9 @@ I made this little game prototype to practice mobile game development, networked
 
 Players engage in a fight to the death, swinging around using grappling hooks and firing their rocket launchers. The grappling hooks are rubberband-like, slinging the players around at great speeds. This was inspired by an old favorite of mine called Liero.
 
-To keep things simple, I chose the mechanics so that though the players have fluid movement, they are limited to using a grappling hook to mvoe around. This means that their actions are discrete, which is easier to deal with over the network.
+I wrote all the code in Godot's own GDScript scripting language. I would have probably gone with C#, but according to the Godot website, support for C# on mobile in Godot 4.3 is "experimental" right now, and it's not supported for web builds, and early on in the project I was planning on utilizing web builds. I also considered using C++, but rapid iteration, improved integration with the engine, and lack of boilerplate quickly won me over to GDScript instead.
+
+To keep things simple, I chose the mechanics so that though the players have fluid movement, they are limited to using a grappling hook to move around. This means that their actions are discrete, which is easier to deal with over the network.
 
 I implemented touchscreen joysticks; one for grappling hook and another one for shooting. Pressing your finger down near the joystick activates it, setting that point on the screen as the center of the joystick. When the player releases the joystick, the action is executed, or if the joystick is near its center point, nothing happens for shooting, and for the grappling hook, any existing grappling hook is detached.
 
