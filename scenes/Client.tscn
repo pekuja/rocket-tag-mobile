@@ -78,10 +78,8 @@ offset_bottom = 279.0
 script = ExtResource("7_noch3")
 player_score_display_scene = ExtResource("8_2qdsn")
 
-[node name="LocalPlayer" parent="." node_paths=PackedStringArray("moveInput", "shootInput") instance=ExtResource("4_gjcdf")]
+[node name="LocalPlayer" parent="." instance=ExtResource("4_gjcdf")]
 position = Vector2(966, 465)
-moveInput = NodePath("../CanvasLayer/Touch Joystick (Movement)")
-shootInput = NodePath("../CanvasLayer/Touch Joystick (Shooting)")
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("tileMap")]
 position = Vector2(960, 540)
