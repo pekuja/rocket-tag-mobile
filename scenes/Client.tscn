@@ -1,15 +1,15 @@
 [gd_scene load_steps=14 format=3 uid="uid://b2ljetvkaygbm"]
 
-[ext_resource type="Script" path="res://scripts/client.gd" id="1_4mwrn"]
+[ext_resource type="Script" uid="uid://cojwhblsf5wsc" path="res://scripts/client.gd" id="1_4mwrn"]
 [ext_resource type="PackedScene" uid="uid://d0oq563agkkkg" path="res://scenes/player_character.tscn" id="2_r580c"]
 [ext_resource type="PackedScene" uid="uid://bv3i730ruyfy7" path="res://scenes/projectile.tscn" id="3_d5w14"]
 [ext_resource type="PackedScene" uid="uid://ll1qk50qo6k7" path="res://scenes/local_player.tscn" id="4_gjcdf"]
-[ext_resource type="Script" path="res://scripts/set_camera_zoom.gd" id="4_kd73a"]
+[ext_resource type="Script" uid="uid://do1lvc4an0l8u" path="res://scripts/set_camera_zoom.gd" id="4_kd73a"]
 [ext_resource type="PackedScene" uid="uid://bxm1sx5j25goh" path="res://scenes/grappling_hook.tscn" id="4_uiary"]
 [ext_resource type="PackedScene" uid="uid://c8kqguxgspmf6" path="res://scenes/Level.tscn" id="5_er1bc"]
 [ext_resource type="PackedScene" uid="uid://dbdtq8xotn1fj" path="res://scenes/touch_joystick_ui.tscn" id="5_uduoh"]
 [ext_resource type="PackedScene" uid="uid://b60abx4wrm4jm" path="res://scenes/explosion.tscn" id="5_y3okv"]
-[ext_resource type="Script" path="res://scripts/scoreboard.gd" id="7_noch3"]
+[ext_resource type="Script" uid="uid://dwbstojwwnh3b" path="res://scripts/scoreboard.gd" id="7_noch3"]
 [ext_resource type="PackedScene" uid="uid://cvs8eeiltwlsk" path="res://scenes/player_score_display.tscn" id="8_2qdsn"]
 
 [sub_resource type="SystemFont" id="SystemFont_np1rk"]

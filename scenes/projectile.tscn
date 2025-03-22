@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bv3i730ruyfy7"]
 
-[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_ogaia"]
+[ext_resource type="Script" uid="uid://bjwa62rvkf254" path="res://scripts/projectile.gd" id="1_ogaia"]
 [ext_resource type="Texture2D" uid="uid://bybpbgg6tnagb" path="res://assets/spaceMissiles_006.png" id="2_votrp"]
 
 [node name="Projectile" type="Node2D"]

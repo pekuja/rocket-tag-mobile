@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bxm1sx5j25goh"]
 
-[ext_resource type="Script" path="res://scripts/grappling_hook.gd" id="1_ec65q"]
+[ext_resource type="Script" uid="uid://lc6weeqkflpl" path="res://scripts/grappling_hook.gd" id="1_ec65q"]
 [ext_resource type="Texture2D" uid="uid://sr6lntvt2jd1" path="res://assets/wireHook.png" id="1_uwkml"]
 
 [node name="Grappling Hook" type="Node2D"]
